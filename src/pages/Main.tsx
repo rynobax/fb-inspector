@@ -6,6 +6,11 @@ import { usePath } from 'hooks/path';
 
 function Main() {
   const { path, setPath } = usePath();
+
+  function pathAt(i: number) {
+    return path.slice(0, i + 1);
+  }
+
   return (
     <Container>
       <input
@@ -16,9 +21,12 @@ function Main() {
           setPath(newPath);
         }}
       />
-      {path.map((p, i) => (
-        <Link key={i}>{p}</Link>
-      ))}
+      <div>
+        <Link onClick={() => setPath([])}>/</Link>
+        {path.map((p, i) => (
+          <Link key={i} onClick={() => setPath(pathAt(i))}>{p}</Link>
+        ))}
+      </div>
       <Content>
         <Node path={path} depth={0} startOpen />
       </Content>
@@ -34,6 +42,7 @@ const Container = styled.div`
 const Content = styled.div``;
 
 const Link = styled.span`
+  margin-right: 8px;
   :hover {
     text-decoration: underline;
     cursor: pointer;

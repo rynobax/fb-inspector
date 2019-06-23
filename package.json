@@ -6,6 +6,7 @@
     "got": "^9.6.0",
     "mobx": "^5.10.1",
     "react": "^16.8.6",
+    "react-cache": "^2.0.0-alpha.1",
     "react-dom": "^16.8.6",
     "react-scripts": "3.0.1",
     "styled-components": "^4.3.2",
@@ -14,6 +15,7 @@
   "devDependencies": {
     "@types/got": "^9.6.0",
     "@types/react": "^16.8.22",
+    "@types/react-cache": "^2.0.1",
     "@types/react-dom": "^16.8.4",
     "@types/styled-components": "^4.1.16"
   },

@@ -4,8 +4,22 @@ import styled from 'styled-components';
 import Add from 'icons/Add';
 import Remove from 'icons/Remove';
 
-import { useFirebase } from 'hooks/firebase';
+import { useFirebase, FirebaseValue, FirebaseResource } from 'hooks/firebase';
 import { usePath } from 'hooks/path';
+
+function renderValue(v: FirebaseValue) {
+  switch(typeof v) {
+    case 'string':
+      return `"${v}"`;
+    case 'number':
+      return String(v);
+    case 'boolean':
+      return String(v);
+    case 'object':
+      if(!v) return 'null';
+      else return null;
+  }
+}
 
 interface NodeProps {
   path: string[];
@@ -15,13 +29,15 @@ interface NodeProps {
 
 const Node: React.FC<NodeProps> = props => {
   const [open, setOpen] = useState(!!props.startOpen);
-  const { data, loading } = useFirebase(props.path);
+  // const { data, loading } = useFirebase(props.path);
   const { setPath } = usePath();
   const key = props.path[props.path.length - 1] || '/';
 
+  const data = FirebaseResource.read(props.path.join('/'));
+
   const isObject = !!(data && typeof data === 'object');
 
-  if (loading) return null;
+  // if (loading) return null;
 
   const iconSize = 16;
 
@@ -33,11 +49,11 @@ const Node: React.FC<NodeProps> = props => {
             {open ? <Remove size={iconSize} /> : <Add size={iconSize} />}
           </Expand>
         )}
-        <Key expandable={isObject} onClick={() => setPath(props.path)}>{key}: </Key>
+        <Key expandable={isObject} onClick={() => setPath(props.path)}>{key} </Key>
       </Label>
 
       <Value>
-        {!isObject && JSON.stringify(data)}
+        {renderValue(data)}
         {isObject &&
           open &&
           Object.entries(data || {}).map(([k, v]) => {
@@ -89,6 +105,7 @@ const Key = styled.div<{ expandable: boolean }>`
 const Label = styled.div`
   display: flex;
   flex-direction: row;
+  margin-right: 8px;
 `;
 
 const Value = styled.div`

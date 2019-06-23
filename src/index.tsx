@@ -5,4 +5,6 @@ import './assets/root.css';
 
 import Context from './Context';
 
-ReactDOM.render(<Context />, document.getElementById('root'));
+(ReactDOM as any)
+  .unstable_createRoot(document.getElementById('root'))
+  .render(<Context />);

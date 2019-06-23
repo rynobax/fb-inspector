@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import got from 'got';
 import { observable, reaction } from 'mobx';
+import { unstable_createResource } from 'react-cache';
 
 type FirebaseScalar = string | number | boolean;
 interface FirebaseObject {
   [key: string]: FirebaseScalar;
 }
-type FirebaseValue = null | FirebaseScalar | FirebaseObject;
+export type FirebaseValue = null | FirebaseScalar | FirebaseObject;
 
 const BASE_URL = 'https://fb-inspector-test.firebaseio.com/';
 
@@ -27,6 +28,13 @@ class FirebaseStore {
 }
 
 const store = new FirebaseStore();
+
+export const FirebaseResource = unstable_createResource<string, FirebaseValue>(
+  async path => {
+    const data = await getData(path);
+    return data;
+  }
+);
 
 export const useFirebase = (path: string[]) => {
   const pathKey = path.join('/');
