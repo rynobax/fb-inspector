@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense as _S } from 'react';
 import styled from 'styled-components';
 
 import Add from 'icons/Add';
@@ -7,8 +7,10 @@ import Remove from 'icons/Remove';
 import { useFirebase, FirebaseValue, FirebaseResource } from 'hooks/firebase';
 import { usePath } from 'hooks/path';
 
+const Suspense = _S as any;
+
 function renderValue(v: FirebaseValue) {
-  switch(typeof v) {
+  switch (typeof v) {
     case 'string':
       return `"${v}"`;
     case 'number':
@@ -16,7 +18,7 @@ function renderValue(v: FirebaseValue) {
     case 'boolean':
       return String(v);
     case 'object':
-      if(!v) return 'null';
+      if (!v) return 'null';
       else return null;
   }
 }
@@ -49,24 +51,28 @@ const Node: React.FC<NodeProps> = props => {
             {open ? <Remove size={iconSize} /> : <Add size={iconSize} />}
           </Expand>
         )}
-        <Key expandable={isObject} onClick={() => setPath(props.path)}>{key} </Key>
+        <Key expandable={isObject} onClick={() => setPath(props.path)}>
+          {key}{' '}
+        </Key>
       </Label>
 
-      <Value>
-        {renderValue(data)}
-        {isObject &&
-          open &&
-          Object.entries(data || {}).map(([k, v]) => {
-            const newPath = [...props.path, k];
-            return (
-              <Node
-                key={newPath.join('/')}
-                path={newPath}
-                depth={props.depth + 1}
-              />
-            );
-          })}
-      </Value>
+      <Suspense fallback={null}>
+        <Value>
+          {renderValue(data)}
+          {isObject &&
+            open &&
+            Object.entries(data || {}).map(([k, v]) => {
+              const newPath = [...props.path, k];
+              return (
+                <Node
+                  key={newPath.join('/')}
+                  path={newPath}
+                  depth={props.depth + 1}
+                />
+              );
+            })}
+        </Value>
+      </Suspense>
     </Container>
   );
 };
@@ -89,12 +95,12 @@ const Expand = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 8px
+  margin-right: 8px;
 `;
 
 const Key = styled.div<{ expandable: boolean }>`
   font-weight: 700;
-  margin-left: ${p => p.expandable ? 0 : 26}px;
+  margin-left: ${p => (p.expandable ? 0 : 26)}px;
 
   :hover {
     text-decoration: underline;

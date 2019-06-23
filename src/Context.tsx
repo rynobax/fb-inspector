@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 
 import Main from 'pages/Main';
 import { PathContext } from 'hooks/path';
@@ -9,11 +9,11 @@ const Context: React.FC = () => {
   return (
     <React.StrictMode>
       <ErrorBoundary>
-        <React.Suspense fallback={null}>
+        <Suspense fallback={null}>
           <PathContext.Provider value={{ path, setPath }}>
             <Main />
           </PathContext.Provider>
-        </React.Suspense>
+        </Suspense>
       </ErrorBoundary>
     </React.StrictMode>
   );
