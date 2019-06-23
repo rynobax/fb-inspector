@@ -11,7 +11,7 @@ export type FirebaseValue = null | FirebaseScalar | FirebaseObject;
 
 const BASE_URL = 'https://fb-inspector-test.firebaseio.com/';
 
-async function getData(path: string): Promise<FirebaseValue> {
+async function queryData(path: string): Promise<FirebaseValue> {
   const data = await got(`${BASE_URL}${path}.json?shallow=true`);
   return JSON.parse(data.body);
 }
@@ -31,7 +31,7 @@ const store = new FirebaseStore();
 
 export const FirebaseResource = unstable_createResource<string, FirebaseValue>(
   async path => {
-    const data = await getData(path);
+    const data = await queryData(path);
     return data;
   }
 );
@@ -59,7 +59,7 @@ export const useFirebase = (path: string[]) => {
   useEffect(() => {
     if (initial) return;
     let cancelled = false;
-    getData(pathKey).then(newData => {
+    queryData(pathKey).then(newData => {
       if (!cancelled) {
         setData(newData);
         setLoading(false);

@@ -31,15 +31,12 @@ interface NodeProps {
 
 const Node: React.FC<NodeProps> = props => {
   const [open, setOpen] = useState(!!props.startOpen);
-  // const { data, loading } = useFirebase(props.path);
   const { setPath } = usePath();
   const key = props.path[props.path.length - 1] || '/';
 
   const data = FirebaseResource.read(props.path.join('/'));
 
   const isObject = !!(data && typeof data === 'object');
-
-  // if (loading) return null;
 
   const iconSize = 16;
 
