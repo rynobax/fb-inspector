@@ -1,10 +1,43 @@
 import React from 'react';
-import Node from 'components/Node';
+import styled from 'styled-components';
 
-function App() {
+import Node from 'components/Node';
+import { usePath } from 'hooks/path';
+
+function Main() {
+  const { path, setPath } = usePath();
   return (
-    <Node path={[]} depth={0} />
+    <Container>
+      <input
+        key={path.join('/')}
+        defaultValue={path}
+        onBlur={e => {
+          const newPath = e.target.value.split('/').filter(e => !!e);
+          setPath(newPath);
+        }}
+      />
+      {path.map((p, i) => (
+        <Link key={i}>{p}</Link>
+      ))}
+      <Content>
+        <Node path={path} depth={0} startOpen />
+      </Content>
+    </Container>
   );
 }
 
-export default App;
+const Container = styled.div`
+  max-width: 600px;
+  margin: auto;
+`;
+
+const Content = styled.div``;
+
+const Link = styled.span`
+  :hover {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+`;
+
+export default Main;

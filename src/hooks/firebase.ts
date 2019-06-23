@@ -45,15 +45,21 @@ export const useFirebase = (path: string[]) => {
         }
       }
     );
-    return dispose();
+    return dispose;
   }, [pathKey]);
 
   useEffect(() => {
     if (initial) return;
+    let cancelled = false;
     getData(pathKey).then(newData => {
-      setData(newData);
-      setLoading(false);
+      if (!cancelled) {
+        setData(newData);
+        setLoading(false);
+      }
     });
+    return () => {
+      cancelled = true;
+    };
   }, [initial, pathKey]);
 
   return { data, loading };
