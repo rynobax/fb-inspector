@@ -19,7 +19,7 @@ const Node: React.FC<NodeProps> = props => {
   const { setPath } = usePath();
   const key = props.path[props.path.length - 1] || '/';
 
-  const isObject = data && typeof data === 'object';
+  const isObject = !!(data && typeof data === 'object');
 
   if (loading) return null;
 
@@ -33,7 +33,7 @@ const Node: React.FC<NodeProps> = props => {
             {open ? <Remove size={iconSize} /> : <Add size={iconSize} />}
           </Expand>
         )}
-        <Key onClick={() => setPath(props.path)}>{key}: </Key>
+        <Key expandable={isObject} onClick={() => setPath(props.path)}>{key}: </Key>
       </Label>
 
       <Value>
@@ -58,7 +58,9 @@ const Node: React.FC<NodeProps> = props => {
 const Container = styled.div<{ open: boolean; depth: number }>`
   display: flex;
   flex-direction: ${p => (p.open ? 'column' : 'row')};
-  margin-left: ${p => p.depth * 24}px;
+  margin-left: ${p => p.depth * 14}px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 `;
 
 const Expand = styled.button`
@@ -66,15 +68,17 @@ const Expand = styled.button`
   padding: 0px;
   border: 1px solid black;
   border-radius: 2px;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-right: 8px
 `;
 
-const Key = styled.div`
+const Key = styled.div<{ expandable: boolean }>`
   font-weight: 700;
+  margin-left: ${p => p.expandable ? 0 : 26}px;
 
   :hover {
     text-decoration: underline;
