@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Menu, MenuList, MenuButton, MenuItem } from '@reach/menu-button';
+
 import { useProject } from 'hooks/project';
+
 import ChevronDown from 'icons/ChevronDown';
 import Add from 'icons/Add';
+
+import AddProject from './AddProject';
 
 interface HeaderProps {}
 
 const Header: React.FC<HeaderProps> = props => {
   const { projects, project, selectProject } = useProject();
+  const [addOpen, setAddOpen] = useState(true);
   return (
     <Bar>
       <Content>
@@ -23,24 +28,26 @@ const Header: React.FC<HeaderProps> = props => {
                 {p.name}
               </MenuItem>
             ))}
-            <MenuItem onSelect={() => console.log('add')}>
+            <MenuItem onSelect={() => setAddOpen(true)}>
               <Add size={24} />
               Add Project
             </MenuItem>
           </MenuList>
         </Menu>
       </Content>
+      <AddProject open={addOpen} close={() => setAddOpen(false)} />
     </Bar>
   );
 };
 
 const ProjectButton = styled(MenuButton)`
-  background: white;
-  border: none;
-  outline: none;
   display: flex;
   flex-direction: row;
   align-items: center;
+  border: none;
+  :hover {
+    border: none;
+  }
 `;
 
 const Bar = styled.div`

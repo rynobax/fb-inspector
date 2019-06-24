@@ -83,9 +83,6 @@ const Container = styled.div<{ open: boolean; depth: number }>`
 `;
 
 const Expand = styled.button`
-  background: white;
-  padding: 0px;
-  border: 1px solid black;
   border-radius: 2px;
   width: 18px;
   height: 18px;
