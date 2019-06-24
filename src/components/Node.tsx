@@ -40,6 +40,9 @@ const Node: React.FC<NodeProps> = props => {
 
   const iconSize = 16;
 
+  const sorted = Object.entries(data || {}).slice();
+  sorted.sort(([a], [b]) => a.localeCompare(b));
+
   return (
     <Container open={open} depth={props.depth}>
       <Label>
@@ -58,7 +61,7 @@ const Node: React.FC<NodeProps> = props => {
           {renderValue(data)}
           {isObject &&
             open &&
-            Object.entries(data || {}).map(([k, v]) => {
+            sorted.map(([k, v]) => {
               const newPath = [...props.path, k];
               return (
                 <Node

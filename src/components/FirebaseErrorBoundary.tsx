@@ -8,7 +8,7 @@ function getErrorMessage(error: Error) {
     const { statusCode, statusMessage } = error;
     switch (statusCode) {
       case 401:
-        return `Got 401: ${statusMessage}.  Check the auth settings.`;
+        return `Got 401: ${statusMessage}.  Check the project settings.`;
       default:
         return `Unexpected error (${statusCode}): ${statusMessage}`;
     }

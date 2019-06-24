@@ -15,16 +15,17 @@ const AddProject: React.FC<AddProjectProps> = props => {
   const [name, setName] = useState(
     props.editing && project ? project.name : ''
   );
-  const [id, setId] = useState(
-    props.editing && project ? project.id : ''
+  const [id, setId] = useState(props.editing && project ? project.id : '');
+  const [legacyToken, setLegacyToken] = useState(
+    props.editing && project ? project.legacyToken : ''
   );
 
   function submit() {
     if (props.editing && project) {
-      updateProject({ ...project, name });
+      updateProject({ ...project, name, legacyToken });
     } else {
       const __id = String(Date.now());
-      addProject({ __id, id, name });
+      addProject({ __id, id, name, legacyToken });
     }
     props.close();
     setName('');
@@ -39,10 +40,12 @@ const AddProject: React.FC<AddProjectProps> = props => {
       <CloseButton onClick={props.close}>
         <Close size={30} />
       </CloseButton>
-      <Label>Name</Label>
+      <Label>Name*</Label>
       <Input value={name} onChange={e => setName(e.target.value)} />
-      <Label>Project URL</Label>
+      <Label>Project URL*</Label>
       <Input value={id} onChange={e => setId(e.target.value)} />
+      <Label>Legacy token</Label>
+      <Input value={legacyToken} onChange={e => setLegacyToken(e.target.value)} />
       <div>
         <FinishButton onClick={submit}>Save</FinishButton>
         {props.editing && <DeleteButton onClick={remove}>Delete</DeleteButton>}

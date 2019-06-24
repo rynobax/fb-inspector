@@ -5,6 +5,7 @@ export interface Project {
   __id: string;
   id: string;
   name: string;
+  legacyToken: string;
 }
 
 interface ProjectContextType {

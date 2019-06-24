@@ -29,13 +29,19 @@ const Header: React.FC<HeaderProps> = props => {
             <ChevronDown size={24} />
           </ProjectButton>
           <MenuList className="slide-down">
-            {projects.map(p => (
-              <MenuItem key={p.id} onSelect={() => selectProject(p.id)}>
-                {p.name}
-              </MenuItem>
-            ))}
+            {projects.map(p => {
+              const selectedMark =
+                project && project.__id === p.__id ? '> ' : '';
+              return (
+                <MenuItem key={p.id} onSelect={() => selectProject(p.id)}>
+                  {selectedMark}{p.name}
+                </MenuItem>
+              );
+            })}
             <MenuItem onSelect={() => setModal('editing')}>
-              <Edit size={24} />
+              <div style={{ width: 3 }} />
+              <Edit size={18} />
+              <div style={{ width: 3 }} />
               Edit Selected Project
             </MenuItem>
             <MenuItem onSelect={() => setModal('adding')}>
