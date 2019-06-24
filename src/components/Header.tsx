@@ -13,7 +13,7 @@ interface HeaderProps {}
 
 const Header: React.FC<HeaderProps> = props => {
   const { projects, project, selectProject } = useProject();
-  const [addOpen, setAddOpen] = useState(true);
+  const [addOpen, setAddOpen] = useState(false);
   return (
     <Bar>
       <Content>

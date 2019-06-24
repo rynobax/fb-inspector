@@ -29,3 +29,15 @@ button:hover {
   transition: 0.5s;
   cursor: pointer;
 }
+
+input {
+  outline: none;
+  padding: 8px;
+  border-radius: 2px;
+  border: 1px solid #CCC;
+}
+
+input:focus {
+  border: 1px solid #555;
+  transition: 0.5s;
+}

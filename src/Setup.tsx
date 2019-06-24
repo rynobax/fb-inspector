@@ -4,20 +4,24 @@ import Main from 'pages/Main';
 import { PathContext } from 'hooks/path';
 import { ProjectContext, Project } from 'hooks/project';
 import ErrorBoundary from 'components/ErrorBoundary';
+import useLocalStorage from 'hooks/localstore';
 
 const Setup: React.FC = () => {
   // Path
   const [path, setPath] = useState<string[]>([]);
 
   // Project
-  const [projects, setProjects] = useState<Project[]>([
-    { id: '1', name: 'Cool Project' },
-    { id: '2', name: 'Billy Gates' }
-  ]);
+  const [projectsJSON, setProjectsJSON] = useLocalStorage('projects', '[]');
+
+  const [projects, setProjects] = useState<Project[]>(() => {
+    return JSON.parse(projectsJSON);
+  });
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
 
   const addProject = (project: Project) => {
-    setProjects([...projects, project]);
+    const newProjects = [...projects, project];
+    setProjects(newProjects);
+    setProjectsJSON(JSON.stringify(newProjects));
   };
 
   const project = projects.find(p => p.id === selectedProject) || null;
