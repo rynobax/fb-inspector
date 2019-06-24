@@ -15,14 +15,16 @@ const AddProject: React.FC<AddProjectProps> = props => {
   const [name, setName] = useState(
     props.editing && project ? project.name : ''
   );
-  console.log(props, project, name);
+  const [id, setId] = useState(
+    props.editing && project ? project.id : ''
+  );
 
   function submit() {
     if (props.editing && project) {
       updateProject({ ...project, name });
     } else {
-      const id = String(Date.now());
-      addProject({ id, name });
+      const __id = String(Date.now());
+      addProject({ __id, id, name });
     }
     props.close();
     setName('');
@@ -39,6 +41,8 @@ const AddProject: React.FC<AddProjectProps> = props => {
       </CloseButton>
       <Label>Name</Label>
       <Input value={name} onChange={e => setName(e.target.value)} />
+      <Label>Project URL</Label>
+      <Input value={id} onChange={e => setId(e.target.value)} />
       <div>
         <FinishButton onClick={submit}>Save</FinishButton>
         {props.editing && <DeleteButton onClick={remove}>Delete</DeleteButton>}

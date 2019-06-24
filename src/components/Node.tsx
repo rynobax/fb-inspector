@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import Add from 'icons/Add';
 import Remove from 'icons/Remove';
 
-import { useFirebase, FirebaseValue, FirebaseResource } from 'hooks/firebase';
+import { useFirebase, FirebaseValue } from 'hooks/firebase';
 import { usePath } from 'hooks/path';
 
 const Suspense = _S as any;
@@ -34,7 +34,7 @@ const Node: React.FC<NodeProps> = props => {
   const { setPath } = usePath();
   const key = props.path[props.path.length - 1] || '/';
 
-  const data = FirebaseResource.read(props.path.join('/'));
+  const data = useFirebase(props.path);
 
   const isObject = !!(data && typeof data === 'object');
 

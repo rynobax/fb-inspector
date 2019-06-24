@@ -1,6 +1,8 @@
 import { createContext, useContext } from 'react';
 
 export interface Project {
+  // Used internally to keep track
+  __id: string;
   id: string;
   name: string;
 }

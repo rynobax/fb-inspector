@@ -21,7 +21,7 @@ const Header: React.FC<HeaderProps> = props => {
   const open = modal !== 'closed';
 
   return (
-    <Bar>
+    <Bar id="bar">
       <Content>
         <Menu>
           <ProjectButton>
@@ -73,6 +73,10 @@ const Bar = styled.div`
 const Content = styled.div`
   max-width: 600px;
   margin: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 100%;
 `;
 
 export default Header;

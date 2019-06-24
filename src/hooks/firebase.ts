@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
 import got from 'got';
-import { observable, reaction } from 'mobx';
-import { unstable_createResource } from 'react-cache';
+import { unstable_createResource, Resource } from 'react-cache';
+
+import { ProjectContext } from './project';
+import { useContext } from 'react';
 
 type FirebaseScalar = string | number | boolean;
 interface FirebaseObject {
@@ -9,66 +10,35 @@ interface FirebaseObject {
 }
 export type FirebaseValue = null | FirebaseScalar | FirebaseObject;
 
-const BASE_URL = 'https://fb-inspector-test.firebaseio.com/';
-
-async function queryData(path: string): Promise<FirebaseValue> {
-  const data = await got(`${BASE_URL}${path}.json?shallow=true`);
+async function queryData(
+  id: string,
+  path: string
+): Promise<FirebaseValue> {
+  const data = await got(`https://${id}.firebaseio.com/${path}.json?shallow=true`);
   return JSON.parse(data.body);
 }
 
-interface Store {
-  [path: string]: {
-    loading: boolean;
-    data: FirebaseValue;
-  } | null;
-}
+const resources: {
+  [id: string]: Resource<string, FirebaseValue>;
+} = {};
 
-class FirebaseStore {
-  @observable store: Store = {};
-}
-
-const store = new FirebaseStore();
-
-export const FirebaseResource = unstable_createResource<string, FirebaseValue>(
-  async path => {
-    const data = await queryData(path);
-    return data;
+function getOrCreateResource(id: string) {
+  if(!resources[id]) {
+    resources[id] = createFirebaseResource(id);
   }
-);
+  return resources[id];
+}
+
+export const createFirebaseResource = (baseUrl: string) =>
+  unstable_createResource<string, FirebaseValue>(async path => {
+    const data = await queryData(baseUrl, path);
+    return data;
+  });
 
 export const useFirebase = (path: string[]) => {
-  const pathKey = path.join('/');
-  const initial = store.store[pathKey];
-
-  const [loading, setLoading] = useState(initial ? initial.loading : true);
-  const [data, setData] = useState(initial ? initial.data : null);
-
-  useEffect(() => {
-    const dispose = reaction(
-      () => store.store[pathKey],
-      updated => {
-        if (updated) {
-          setLoading(updated.loading);
-          setData(updated.data);
-        }
-      }
-    );
-    return dispose;
-  }, [pathKey]);
-
-  useEffect(() => {
-    if (initial) return;
-    let cancelled = false;
-    queryData(pathKey).then(newData => {
-      if (!cancelled) {
-        setData(newData);
-        setLoading(false);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [initial, pathKey]);
-
-  return { data, loading };
+  const { project } = useContext(ProjectContext);
+  if (!project) throw Error('Trying to use firebase with no project selected!');
+  const resource = getOrCreateResource(project.id);
+  const data = resource.read(path.join('/'));
+  return data;
 };
