@@ -40,6 +40,7 @@ function getUpdatedState(state: Settings, action: SettingsAction) {
     case 'add':
       return produce(state, s => {
         s.projects.push(action.project);
+        s.selectedProject = action.project.__id;
       });
     case 'remove':
       return produce(state, s => {

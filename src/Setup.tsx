@@ -1,9 +1,9 @@
 import React, { useState, Suspense } from 'react';
 
-import Main from 'pages/Main';
+import Main from 'components/Main';
 import { PathContext } from 'hooks/path';
 import { ProjectContext } from 'hooks/project';
-import ErrorBoundary from 'components/ErrorBoundary';
+import TopLevelErrorBoundary from 'components/TopLevelErrorBoundary';
 import { useSettings } from 'hooks/settings';
 
 const Setup: React.FC = () => {
@@ -18,7 +18,7 @@ const Setup: React.FC = () => {
 
   return (
     <React.StrictMode>
-      <ErrorBoundary>
+      <TopLevelErrorBoundary>
         <Suspense fallback={null}>
           <PathContext.Provider value={{ path, setPath }}>
             <ProjectContext.Provider
@@ -35,7 +35,7 @@ const Setup: React.FC = () => {
             </ProjectContext.Provider>
           </PathContext.Provider>
         </Suspense>
-      </ErrorBoundary>
+      </TopLevelErrorBoundary>
     </React.StrictMode>
   );
 };

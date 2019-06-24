@@ -1,10 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { usePath } from 'hooks/path';
-
 import Node from 'components/Node';
 import Header from 'components/Header';
+import FirebaseErrorBoundary from './FirebaseErrorBoundary';
+
+import { usePath } from 'hooks/path';
 import { useProject } from 'hooks/project';
 
 function Main() {
@@ -16,7 +17,7 @@ function Main() {
   }
 
   const content = project ? (
-    <>
+    <FirebaseErrorBoundary>
       <input
         key={path.join('/')}
         defaultValue={path}
@@ -36,7 +37,7 @@ function Main() {
       <Content>
         <Node path={path} depth={0} startOpen />
       </Content>
-    </>
+    </FirebaseErrorBoundary>
   ) : null;
 
   return (

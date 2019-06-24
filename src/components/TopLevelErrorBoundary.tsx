@@ -1,16 +1,13 @@
 import React from 'react';
 
-interface ErrorBoundaryProps {}
+interface Props {}
 
-interface ErrorBoundaryState {
+interface State {
   error: Error | null;
 }
 
-class ErrorBoundary extends React.Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
-  state: ErrorBoundaryState = { error: null };
+class TopLevelErrorBoundary extends React.Component<Props, State> {
+  state: State = { error: null };
 
   static getDerivedStateFromError(error: Error) {
     // Update state so the next render will show the fallback UI.
@@ -33,4 +30,4 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-export default ErrorBoundary;
+export default TopLevelErrorBoundary;

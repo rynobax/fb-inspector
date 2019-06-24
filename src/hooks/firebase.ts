@@ -14,7 +14,7 @@ async function queryData(
   id: string,
   path: string
 ): Promise<FirebaseValue> {
-  const data = await got(`https://${id}.firebaseio.com/${path}.json?shallow=true`);
+  const data = await got(`https://${id}.firebaseio.com/${path}.json?access_token=backend-worker&shallow=true`);
   return JSON.parse(data.body);
 }
 
