@@ -17,7 +17,7 @@ button {
   border: none;
   outline: none;
   padding: 0px;
-  border: 1px solid #AAA;
+  border: 1px solid #aaa;
   color: #555;
   fill: #777;
 }
@@ -34,7 +34,7 @@ input {
   outline: none;
   padding: 8px;
   border-radius: 2px;
-  border: 1px solid #CCC;
+  border: 1px solid #ccc;
 }
 
 input:focus {

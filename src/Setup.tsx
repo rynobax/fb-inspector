@@ -24,6 +24,22 @@ const Setup: React.FC = () => {
     setProjectsJSON(JSON.stringify(newProjects));
   };
 
+  const updateProject = (project: Project) => {
+    const newProjects = projects.map(p => {
+      if (p.id === project.id) return project;
+      else return p;
+    });
+    setProjects(newProjects);
+    setProjectsJSON(JSON.stringify(newProjects));
+  };
+
+  const removeProject = (project: string) => {
+    const newProjects = projects.filter(p => p.id !== project);
+    setSelectedProject(null);
+    setProjects(newProjects);
+    setProjectsJSON(JSON.stringify(newProjects));
+  };
+
   const project = projects.find(p => p.id === selectedProject) || null;
 
   return (
@@ -36,7 +52,9 @@ const Setup: React.FC = () => {
                 project,
                 projects,
                 addProject,
-                selectProject: setSelectedProject
+                selectProject: setSelectedProject,
+                updateProject,
+                removeProject,
               }}
             >
               <Main />

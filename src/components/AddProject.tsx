@@ -7,18 +7,29 @@ import { useProject } from 'hooks/project';
 interface AddProjectProps {
   open: boolean;
   close: () => void;
+  editing: boolean;
 }
 
 const AddProject: React.FC<AddProjectProps> = props => {
-  const [name, setName] = useState('');
-  const { addProject } = useProject();
+  const { addProject, project, updateProject, removeProject } = useProject();
+  const [name, setName] = useState(
+    props.editing && project ? project.name : ''
+  );
+  console.log(props, project, name);
 
   function submit() {
-    console.log(name);
-    const id = String(Date.now());
-    addProject({ id, name });
+    if (props.editing && project) {
+      updateProject({ ...project, name });
+    } else {
+      const id = String(Date.now());
+      addProject({ id, name });
+    }
     props.close();
     setName('');
+  }
+
+  function remove() {
+    if (project) removeProject(project.id);
   }
 
   return (
@@ -29,7 +40,8 @@ const AddProject: React.FC<AddProjectProps> = props => {
       <Label>Name</Label>
       <Input value={name} onChange={e => setName(e.target.value)} />
       <div>
-        <FinishButton onClick={submit}>Add</FinishButton>
+        <FinishButton onClick={submit}>Save</FinishButton>
+        {props.editing && <DeleteButton onClick={remove}>Delete</DeleteButton>}
       </div>
     </AddDialog>
   );
@@ -58,9 +70,22 @@ const CloseButton = styled.button`
   }
 `;
 
-const FinishButton = styled.button`
+const BottomButton = styled.button`
   padding: 12px;
   border-radius: 4px;
+`;
+
+const FinishButton = styled(BottomButton)``;
+
+const DeleteButton = styled(BottomButton)`
+  margin-left: 16px;
+  color: #c00;
+  border: 1px solid #c00;
+
+  :hover {
+    color: #f00;
+    border: 1px solid #f00;
+  }
 `;
 
 const Input = styled.input`

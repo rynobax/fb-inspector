@@ -10,6 +10,8 @@ interface ProjectContextType {
   projects: Project[];
   selectProject: (id: string) => void;
   addProject: (project: Project) => void;
+  updateProject: (project: Project) => void;
+  removeProject: (id: string) => void;
 }
 
 export const ProjectContext = createContext<ProjectContextType>({
@@ -20,7 +22,13 @@ export const ProjectContext = createContext<ProjectContextType>({
   },
   addProject: () => {
     throw Error('addProject not initalized!');
-  }
+  },
+  updateProject: () => {
+    throw Error('updateProject not initalized!');
+  },
+  removeProject: () => {
+    throw Error('removeProject not initalized!');
+  },
 });
 
 export const useProject = () => {

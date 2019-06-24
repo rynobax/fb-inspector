@@ -25,6 +25,10 @@
   color: white;
 }
 
+[data-selected] .primary {
+  fill: white;
+}
+
 [data-selected] .secondary {
   fill: white;
 }

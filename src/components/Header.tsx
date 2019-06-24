@@ -6,14 +6,20 @@ import { useProject } from 'hooks/project';
 
 import ChevronDown from 'icons/ChevronDown';
 import Add from 'icons/Add';
+import Edit from 'icons/Edit';
 
 import AddProject from './AddProject';
+
+type OpenValues = 'closed' | 'editing' | 'adding';
 
 interface HeaderProps {}
 
 const Header: React.FC<HeaderProps> = props => {
   const { projects, project, selectProject } = useProject();
-  const [addOpen, setAddOpen] = useState(false);
+  const [modal, setModal] = useState<OpenValues>('closed');
+
+  const open = modal !== 'closed';
+
   return (
     <Bar>
       <Content>
@@ -28,14 +34,24 @@ const Header: React.FC<HeaderProps> = props => {
                 {p.name}
               </MenuItem>
             ))}
-            <MenuItem onSelect={() => setAddOpen(true)}>
+            <MenuItem onSelect={() => setModal('editing')}>
+              <Edit size={24} />
+              Edit Selected Project
+            </MenuItem>
+            <MenuItem onSelect={() => setModal('adding')}>
               <Add size={24} />
-              Add Project
+              New Project
             </MenuItem>
           </MenuList>
         </Menu>
       </Content>
-      <AddProject open={addOpen} close={() => setAddOpen(false)} />
+      {open && (
+        <AddProject
+          open={open}
+          close={() => setModal('closed')}
+          editing={modal === 'editing'}
+        />
+      )}
     </Bar>
   );
 };
