@@ -2,45 +2,19 @@ import React, { useState, Suspense } from 'react';
 
 import Main from 'pages/Main';
 import { PathContext } from 'hooks/path';
-import { ProjectContext, Project } from 'hooks/project';
+import { ProjectContext } from 'hooks/project';
 import ErrorBoundary from 'components/ErrorBoundary';
-import useLocalStorage from 'hooks/localstore';
+import { useSettings } from 'hooks/settings';
 
 const Setup: React.FC = () => {
   // Path
   const [path, setPath] = useState<string[]>([]);
 
   // Project
-  const [projectsJSON, setProjectsJSON] = useLocalStorage('projects', '[]');
+  const [settings, dispatch] = useSettings();
 
-  const [projects, setProjects] = useState<Project[]>(() => {
-    return JSON.parse(projectsJSON);
-  });
-  const [selectedProject, setSelectedProject] = useState<string | null>(null);
-
-  const addProject = (project: Project) => {
-    const newProjects = [...projects, project];
-    setProjects(newProjects);
-    setProjectsJSON(JSON.stringify(newProjects));
-  };
-
-  const updateProject = (project: Project) => {
-    const newProjects = projects.map(p => {
-      if (p.id === project.id) return project;
-      else return p;
-    });
-    setProjects(newProjects);
-    setProjectsJSON(JSON.stringify(newProjects));
-  };
-
-  const removeProject = (project: string) => {
-    const newProjects = projects.filter(p => p.id !== project);
-    setSelectedProject(null);
-    setProjects(newProjects);
-    setProjectsJSON(JSON.stringify(newProjects));
-  };
-
-  const project = projects.find(p => p.id === selectedProject) || null;
+  const project =
+    settings.projects.find(p => p.id === settings.selectedProject) || null;
 
   return (
     <React.StrictMode>
@@ -50,11 +24,11 @@ const Setup: React.FC = () => {
             <ProjectContext.Provider
               value={{
                 project,
-                projects,
-                addProject,
-                selectProject: setSelectedProject,
-                updateProject,
-                removeProject,
+                projects: settings.projects,
+                addProject: project => dispatch({ type: 'add', project }),
+                selectProject: id => dispatch({ type: 'select', id }),
+                updateProject: project => dispatch({ type: 'update', project }),
+                removeProject: id => dispatch({ type: 'remove', id }),
               }}
             >
               <Main />
