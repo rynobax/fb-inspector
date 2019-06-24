@@ -2,9 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './assets/normalize.css';
 import './assets/root.css';
+import './assets/reach.css';
+import '@reach/menu-button/styles.css';
 
-import Context from './Context';
+import Setup from './Setup';
 
 (ReactDOM as any)
   .unstable_createRoot(document.getElementById('root'))
-  .render(<Context />);
+  .render(<Setup />);

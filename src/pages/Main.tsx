@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
-import Node from 'components/Node';
 import { usePath } from 'hooks/path';
+
+import Node from 'components/Node';
+import Header from 'components/Header';
 
 function Main() {
   const { path, setPath } = usePath();
@@ -12,25 +14,30 @@ function Main() {
   }
 
   return (
-    <Container>
-      <input
-        key={path.join('/')}
-        defaultValue={path}
-        onBlur={e => {
-          const newPath = e.target.value.split('/').filter(e => !!e);
-          setPath(newPath);
-        }}
-      />
-      <div>
-        <Link onClick={() => setPath([])}>/</Link>
-        {path.map((p, i) => (
-          <Link key={i} onClick={() => setPath(pathAt(i))}>{p}</Link>
-        ))}
-      </div>
-      <Content>
-        <Node path={path} depth={0} startOpen />
-      </Content>
-    </Container>
+    <>
+      <Header />
+      <Container>
+        <input
+          key={path.join('/')}
+          defaultValue={path}
+          onBlur={e => {
+            const newPath = e.target.value.split('/').filter(e => !!e);
+            setPath(newPath);
+          }}
+        />
+        <div>
+          <Link onClick={() => setPath([])}>/</Link>
+          {path.map((p, i) => (
+            <Link key={i} onClick={() => setPath(pathAt(i))}>
+              {p}
+            </Link>
+          ))}
+        </div>
+        <Content>
+          <Node path={path} depth={0} startOpen />
+        </Content>
+      </Container>
+    </>
   );
 }
 
