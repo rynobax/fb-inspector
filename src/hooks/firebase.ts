@@ -1,8 +1,8 @@
+import { useContext } from 'react';
 import got from 'got';
-import { unstable_createResource, Resource } from 'react-cache';
+import { observable } from 'mobx';
 
 import { ProjectContext, Project } from './project';
-import { useContext } from 'react';
 
 type FirebaseScalar = string | number | boolean;
 interface FirebaseObject {
@@ -36,27 +36,45 @@ async function queryData(
   return JSON.parse(data.body);
 }
 
-const resources: {
-  [id: string]: Resource<string, FirebaseValue>;
-} = {};
+type StoreObj = SuccessObj | ErrorObj;
 
-function getOrCreateResource(project: Project) {
-  if (!resources[project.__id]) {
-    resources[project.__id] = createFirebaseResource(project);
-  }
-  return resources[project.__id];
+interface SuccessObj {
+  value: FirebaseValue;
+  error: undefined;
 }
 
-export const createFirebaseResource = (project: Project) =>
-  unstable_createResource<string, FirebaseValue>(async path => {
-    const data = await queryData(project, path);
-    return data;
-  });
+interface ErrorObj {
+  value: undefined;
+  error: Error;
+}
+
+export const dataStore = observable.map<string, StoreObj>({});
+
+export const resetStore = () => dataStore.clear();
 
 export const useFirebase = (path: string[]) => {
   const { project } = useContext(ProjectContext);
   if (!project) throw Error('Trying to use firebase with no project selected!');
-  const resource = getOrCreateResource(project);
-  const data = resource.read(path.join('/'));
-  return data;
+
+  const pathStr = path.join('/');
+  const val = dataStore.get(pathStr);
+  if (!val) {
+    // Haven't cached, kick off request
+    const prom = new Promise(async (resolve, reject) => {
+      try {
+        const value = await queryData(project, pathStr);
+        dataStore.set(pathStr, { value });
+      } catch(error) {
+        dataStore.set(pathStr, { value: null, error });
+      }
+      resolve();
+    });
+    throw prom;
+  } else if(val.error) {
+    // Request error
+    throw val.error;
+  } else {
+    // Have the value
+    return val.value;
+  }
 };

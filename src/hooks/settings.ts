@@ -2,6 +2,7 @@ import { useReducer } from 'react';
 import { Project } from './project';
 import useLocalStorage from './localstore';
 import produce from 'immer';
+import { resetStore } from './firebase';
 
 interface Settings {
   projects: Project[];
@@ -53,6 +54,7 @@ function getUpdatedState(state: Settings, action: SettingsAction) {
         );
       });
     case 'select':
+      resetStore();
       return produce(state, s => {
         s.selectedProject = action.id;
       });

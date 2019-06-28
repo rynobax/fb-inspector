@@ -19,7 +19,7 @@ const Setup: React.FC = () => {
   return (
     <React.StrictMode>
       <TopLevelErrorBoundary>
-        <Suspense fallback={null}>
+        <Suspense fallback={<div>Fallback</div>}>
           <PathContext.Provider value={{ path, setPath }}>
             <ProjectContext.Provider
               value={{

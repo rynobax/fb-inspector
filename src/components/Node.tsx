@@ -1,13 +1,13 @@
-import React, { useState, Suspense as _S } from 'react';
+import React, { Suspense } from 'react';
 import styled from 'styled-components';
 
 import Add from 'icons/Add';
 import Remove from 'icons/Remove';
 
 import { useFirebase, FirebaseValue } from 'hooks/firebase';
-import { usePath } from 'hooks/path';
+import { usePath, useIsPathOpen } from 'hooks/path';
 
-const Suspense = _S as any;
+const ROW_HEIGHT = 46;
 
 function renderValue(v: FirebaseValue) {
   switch (typeof v) {
@@ -30,7 +30,8 @@ interface NodeProps {
 }
 
 const Node: React.FC<NodeProps> = props => {
-  const [open, setOpen] = useState(!!props.startOpen);
+  const { open, toggle } = useIsPathOpen(props.path);
+  // const [open, setOpen] = useState(!!props.startOpen);
   const { setPath } = usePath();
   const key = props.path[props.path.length - 1] || '/';
 
@@ -47,7 +48,7 @@ const Node: React.FC<NodeProps> = props => {
     <Container open={open} depth={props.depth}>
       <Label>
         {isObject && (
-          <Expand onClick={() => setOpen(!open)}>
+          <Expand onClick={toggle}>
             {open ? <Remove size={iconSize} /> : <Add size={iconSize} />}
           </Expand>
         )}
@@ -58,19 +59,19 @@ const Node: React.FC<NodeProps> = props => {
 
       <Suspense fallback={null}>
         <Value>
-          {renderValue(data)}
-          {isObject &&
-            open &&
-            sorted.map(([k, v]) => {
-              const newPath = [...props.path, k];
-              return (
-                <Node
-                  key={newPath.join('/')}
-                  path={newPath}
-                  depth={props.depth + 1}
-                />
-              );
-            })}
+          {isObject
+            ? sorted.map(([k, v]) => {
+                if (!open) return null;
+                const newPath = [...props.path, k];
+                return (
+                  <Node
+                    key={newPath.join('/')}
+                    path={newPath}
+                    depth={props.depth + 1}
+                  />
+                );
+              })
+            : <ScalarValue>{renderValue(data)}</ScalarValue>}
         </Value>
       </Suspense>
     </Container>
@@ -81,8 +82,8 @@ const Container = styled.div<{ open: boolean; depth: number }>`
   display: flex;
   flex-direction: ${p => (p.open ? 'column' : 'row')};
   margin-left: ${p => p.depth * 14}px;
-  padding-top: 4px;
-  padding-bottom: 4px;
+  /* padding-top: 4px;
+  padding-bottom: 4px; */
 `;
 
 const Expand = styled.button`
@@ -109,9 +110,15 @@ const Label = styled.div`
   display: flex;
   flex-direction: row;
   margin-right: 8px;
+  height: ${ROW_HEIGHT}px;
 `;
 
 const Value = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const ScalarValue = styled.div`
   display: flex;
   flex-direction: column;
 `;
