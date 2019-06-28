@@ -9,7 +9,7 @@ import { usePath, useIsPathOpen } from 'hooks/path';
 
 export const ROW_HEIGHT = 46;
 
-function renderValue(v: FirebaseValue) {
+function getValueString(v: FirebaseValue) {
   switch (typeof v) {
     case 'string':
       return `"${v}"`;
@@ -23,39 +23,52 @@ function renderValue(v: FirebaseValue) {
   }
 }
 
+const SuspendedValue: React.FC<{ path: string[] }> = ({ path }) => {
+  const data = useFirebase(path);
+  return <>{getValueString(data)}</>;
+};
+
+const SuspendedExpand: React.FC<{
+  path: string[];
+  toggle: () => void;
+  open: boolean;
+}> = ({ path, toggle, open }) => {
+  const data = useFirebase(path);
+  const isObject = !!(data && typeof data === 'object');
+  if (!isObject) return null;
+
+  console.log({ path, open });
+
+  const iconSize = 16;
+  return (
+    <Expand onClick={toggle}>
+      {open ? <Remove size={iconSize} /> : <Add size={iconSize} />}
+    </Expand>
+  );
+};
+
 interface NodeProps {
   path: string[];
+  style: React.CSSProperties;
 }
 
-const Node: React.FC<NodeProps> = ({ path }) => {
+const Node: React.FC<NodeProps> = ({ path, style }) => {
   const { open, toggle } = useIsPathOpen(path);
   const { setPath } = usePath();
   const key = path[path.length - 1] || '/';
 
-  const data = useFirebase(path);
-
-  const isObject = !!(data && typeof data === 'object');
-
-  const iconSize = 16;
-
-  const sorted = Object.entries(data || {}).slice();
-  sorted.sort(([a], [b]) => a.localeCompare(b));
-
   return (
-    <Container open={open} depth={path.length}>
+    <Container open={open} depth={path.length} style={style}>
       <Label>
-        {isObject && (
-          <Expand onClick={toggle}>
-            {open ? <Remove size={iconSize} /> : <Add size={iconSize} />}
-          </Expand>
-        )}
-        <Key expandable={isObject} onClick={() => setPath(path)}>
+        <Suspense fallback={null}>
+          <SuspendedExpand toggle={toggle} open={open} path={path} />
+        </Suspense>
+        <Key expandable={true} onClick={() => setPath(path)}>
           {key}{' '}
         </Key>
       </Label>
-
       <Suspense fallback={null}>
-        <ScalarValue>{renderValue(data)}</ScalarValue>
+        <SuspendedValue path={path} />
       </Suspense>
     </Container>
   );

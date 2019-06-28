@@ -28,12 +28,13 @@ const openState = observable.map<string, boolean>({});
 
 export const useIsPathOpen = (path: string[]) => {
   const pathStr = pathToString(path);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(() => !!openState.get(pathStr));
   const toggle = () => {
     openState.set(pathStr, !open);
   };
   useEffect(() => {
-    openState.set(pathStr, false);
+    const initial = openState.get(pathStr);
+    if (!initial) openState.set(pathStr, false);
     return observe(openState, pathStr, change => setOpen(change.newValue));
   }, [pathStr]);
   return { open, toggle };
