@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { observable, observe } from 'mobx';
 import { dataStore } from './firebase';
 
@@ -14,17 +14,24 @@ export const PathContext = createContext<PathContextType>({
   },
 });
 
+export function pathToString(path: string[]) {
+  return path.length === 0 ? '/' : `/${path.join('/')}`;
+}
+
 export const usePath = () => {
   const { path, setPath } = useContext(PathContext);
-  return { path, setPath };
+  const pathStr = pathToString(path);
+  return { path, pathStr, setPath };
 };
 
 const openState = observable.map<string, boolean>({});
 
 export const useIsPathOpen = (path: string[]) => {
-  const pathStr = path.join('/');
+  const pathStr = pathToString(path);
   const [open, setOpen] = useState(false);
-  const toggle = () => openState.set(pathStr, !open);
+  const toggle = () => {
+    openState.set(pathStr, !open);
+  };
   useEffect(() => {
     openState.set(pathStr, false);
     return observe(openState, pathStr, change => setOpen(change.newValue));
@@ -33,11 +40,17 @@ export const useIsPathOpen = (path: string[]) => {
 };
 
 function getChildrenPath(initialPath: string[]): string[][] {
-  const pathStr = initialPath.join('/');
+  const pathStr = pathToString(initialPath);
+
   const initialData = dataStore.get(pathStr);
   if (!initialData) return [initialPath];
+
   const { value } = initialData;
   if (typeof value !== 'object' || !value) return [initialPath];
+
+  const isOpen = openState.get(pathStr);
+  if (!isOpen) return [initialPath];
+
   return Object.keys(value).reduce(
     (acc, k) => {
       const newPath = [...initialPath, k];
@@ -49,5 +62,9 @@ function getChildrenPath(initialPath: string[]): string[][] {
 
 export const usePathArr = () => {
   const { path } = usePath();
-  return getChildrenPath(path);
+  const [childrenPath, setChildrenPath] = useState(() => getChildrenPath(path));
+  useEffect(() => {
+    return openState.observe(() => setChildrenPath(getChildrenPath(path)));
+  }, [path]);
+  return childrenPath;
 };

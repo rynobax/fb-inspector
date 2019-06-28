@@ -5,37 +5,41 @@ import Node from 'components/Node';
 import Header from 'components/Header';
 import FirebaseErrorBoundary from './FirebaseErrorBoundary';
 
-import { usePath } from 'hooks/path';
+import { usePath, usePathArr } from 'hooks/path';
 import { useProject } from 'hooks/project';
 
 function Main() {
-  const { path, setPath } = usePath();
+  const { path, pathStr, setPath } = usePath();
   const { project } = useProject();
+  const openPaths = usePathArr();
 
   function pathAt(i: number) {
-    return path.slice(0, i + 1);
+    if(i === 0) return [];
+    return path.slice(0, i);
   }
 
   const content = project ? (
     <FirebaseErrorBoundary>
       <input
-        key={path.join('/')}
-        defaultValue={path}
+        key={pathStr}
+        defaultValue={pathStr.slice(1)}
         onBlur={e => {
           const newPath = e.target.value.split('/').filter(e => !!e);
           setPath(newPath);
         }}
       />
-      <div>
-        <Link onClick={() => setPath([])}>/</Link>
+      <div style={{ marginBottom: 12 }}>
+        <Link onClick={() => setPath(pathAt(0))}>/</Link>
         {path.map((p, i) => (
-          <Link key={i} onClick={() => setPath(pathAt(i))}>
+          <Link key={i} onClick={() => setPath(pathAt(i + 1))}>
             {p}
           </Link>
         ))}
       </div>
       <Content>
-        <Node path={path} depth={0} startOpen />
+        {openPaths.map(path => (
+          <Node path={path} key={path.join('/')} />
+        ))}
       </Content>
     </FirebaseErrorBoundary>
   ) : null;

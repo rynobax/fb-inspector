@@ -7,7 +7,7 @@ import Remove from 'icons/Remove';
 import { useFirebase, FirebaseValue } from 'hooks/firebase';
 import { usePath, useIsPathOpen } from 'hooks/path';
 
-const ROW_HEIGHT = 46;
+export const ROW_HEIGHT = 46;
 
 function renderValue(v: FirebaseValue) {
   switch (typeof v) {
@@ -25,17 +25,14 @@ function renderValue(v: FirebaseValue) {
 
 interface NodeProps {
   path: string[];
-  depth: number;
-  startOpen?: boolean;
 }
 
-const Node: React.FC<NodeProps> = props => {
-  const { open, toggle } = useIsPathOpen(props.path);
-  // const [open, setOpen] = useState(!!props.startOpen);
+const Node: React.FC<NodeProps> = ({ path }) => {
+  const { open, toggle } = useIsPathOpen(path);
   const { setPath } = usePath();
-  const key = props.path[props.path.length - 1] || '/';
+  const key = path[path.length - 1] || '/';
 
-  const data = useFirebase(props.path);
+  const data = useFirebase(path);
 
   const isObject = !!(data && typeof data === 'object');
 
@@ -45,34 +42,20 @@ const Node: React.FC<NodeProps> = props => {
   sorted.sort(([a], [b]) => a.localeCompare(b));
 
   return (
-    <Container open={open} depth={props.depth}>
+    <Container open={open} depth={path.length}>
       <Label>
         {isObject && (
           <Expand onClick={toggle}>
             {open ? <Remove size={iconSize} /> : <Add size={iconSize} />}
           </Expand>
         )}
-        <Key expandable={isObject} onClick={() => setPath(props.path)}>
+        <Key expandable={isObject} onClick={() => setPath(path)}>
           {key}{' '}
         </Key>
       </Label>
 
       <Suspense fallback={null}>
-        <Value>
-          {isObject
-            ? sorted.map(([k, v]) => {
-                if (!open) return null;
-                const newPath = [...props.path, k];
-                return (
-                  <Node
-                    key={newPath.join('/')}
-                    path={newPath}
-                    depth={props.depth + 1}
-                  />
-                );
-              })
-            : <ScalarValue>{renderValue(data)}</ScalarValue>}
-        </Value>
+        <ScalarValue>{renderValue(data)}</ScalarValue>
       </Suspense>
     </Container>
   );
@@ -82,8 +65,6 @@ const Container = styled.div<{ open: boolean; depth: number }>`
   display: flex;
   flex-direction: ${p => (p.open ? 'column' : 'row')};
   margin-left: ${p => p.depth * 14}px;
-  /* padding-top: 4px;
-  padding-bottom: 4px; */
 `;
 
 const Expand = styled.button`
@@ -111,11 +92,6 @@ const Label = styled.div`
   flex-direction: row;
   margin-right: 8px;
   height: ${ROW_HEIGHT}px;
-`;
-
-const Value = styled.div`
-  display: flex;
-  flex-direction: column;
 `;
 
 const ScalarValue = styled.div`

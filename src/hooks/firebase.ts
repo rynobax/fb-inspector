@@ -3,6 +3,7 @@ import got from 'got';
 import { observable } from 'mobx';
 
 import { ProjectContext, Project } from './project';
+import { pathToString } from './path';
 
 type FirebaseScalar = string | number | boolean;
 interface FirebaseObject {
@@ -40,11 +41,11 @@ type StoreObj = SuccessObj | ErrorObj;
 
 interface SuccessObj {
   value: FirebaseValue;
-  error: undefined;
+  error: null;
 }
 
 interface ErrorObj {
-  value: undefined;
+  value: null;
   error: Error;
 }
 
@@ -53,17 +54,17 @@ export const dataStore = observable.map<string, StoreObj>({});
 export const resetStore = () => dataStore.clear();
 
 export const useFirebase = (path: string[]) => {
+  const pathStr = pathToString(path);
   const { project } = useContext(ProjectContext);
   if (!project) throw Error('Trying to use firebase with no project selected!');
 
-  const pathStr = path.join('/');
   const val = dataStore.get(pathStr);
   if (!val) {
     // Haven't cached, kick off request
     const prom = new Promise(async (resolve, reject) => {
       try {
         const value = await queryData(project, pathStr);
-        dataStore.set(pathStr, { value });
+        dataStore.set(pathStr, { value, error: null });
       } catch(error) {
         dataStore.set(pathStr, { value: null, error });
       }
