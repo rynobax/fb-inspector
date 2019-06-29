@@ -8,20 +8,35 @@ import FirebaseErrorBoundary from './FirebaseErrorBoundary';
 
 function Main() {
   return (
-    <>
-      <Header />
-      <Container>
+    <Container>
+      <HeaderContainer>
+        <Header />
+      </HeaderContainer>
+      <BodyContainer>
         <FirebaseErrorBoundary>
           <Body />
         </FirebaseErrorBoundary>
-      </Container>
-    </>
+      </BodyContainer>
+    </Container>
   );
 }
 
 const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+`;
+
+const HeaderContainer = styled.div`
+  flex: 0;
+`;
+
+const BodyContainer = styled.div`
+  width: 100%;
   max-width: 600px;
   margin: auto;
+  flex: 1;
+  display: flex;
 `;
 
 export default Main;

@@ -1,13 +1,13 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, memo } from 'react';
 import styled from 'styled-components';
 
 import Add from 'icons/Add';
 import Remove from 'icons/Remove';
 
-import { useFirebase, FirebaseValue } from 'hooks/firebase';
+import { useFirebase, FirebaseValue, usePrimeFirebase } from 'hooks/firebase';
 import { usePath, useIsPathOpen } from 'hooks/path';
 
-export const ROW_HEIGHT = 46;
+export const ROW_HEIGHT = 32;
 
 function getValueString(v: FirebaseValue) {
   switch (typeof v) {
@@ -35,9 +35,7 @@ const SuspendedExpand: React.FC<{
 }> = ({ path, toggle, open }) => {
   const data = useFirebase(path);
   const isObject = !!(data && typeof data === 'object');
-  if (!isObject) return null;
-
-  console.log({ path, open });
+  if (!isObject) return <ExpandPlaceholder />;
 
   const iconSize = 16;
   return (
@@ -52,27 +50,28 @@ interface NodeProps {
   style: React.CSSProperties;
 }
 
-const Node: React.FC<NodeProps> = ({ path, style }) => {
+const Node: React.FC<NodeProps> = memo(({ path, style }) => {
   const { open, toggle } = useIsPathOpen(path);
   const { setPath } = usePath();
   const key = path[path.length - 1] || '/';
+  usePrimeFirebase(path);
 
   return (
     <Container open={open} depth={path.length} style={style}>
       <Label>
-        <Suspense fallback={null}>
+        <Suspense fallback={<ExpandPlaceholder />}>
           <SuspendedExpand toggle={toggle} open={open} path={path} />
         </Suspense>
         <Key expandable={true} onClick={() => setPath(path)}>
           {key}{' '}
         </Key>
       </Label>
-      <Suspense fallback={null}>
+      <Suspense fallback={<div>Loading...</div>}>
         <SuspendedValue path={path} />
       </Suspense>
     </Container>
   );
-};
+});
 
 const Container = styled.div<{ open: boolean; depth: number }>`
   display: flex;
@@ -80,14 +79,22 @@ const Container = styled.div<{ open: boolean; depth: number }>`
   margin-left: ${p => p.depth * 14}px;
 `;
 
+const EXPAND_SIZE = 18;
+const EXPAND_MARGIN = 8;
 const Expand = styled.button`
+  width: ${EXPAND_SIZE}px;
+  height: ${EXPAND_SIZE}px;
+  margin-right: ${EXPAND_MARGIN}px;
   border-radius: 2px;
-  width: 18px;
-  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 8px;
+`;
+
+const ExpandPlaceholder = styled.div`
+  width: ${EXPAND_SIZE}px;
+  height: ${EXPAND_SIZE}px;
+  margin-right: ${EXPAND_MARGIN}px;
 `;
 
 const Key = styled.div<{ expandable: boolean }>`
@@ -105,11 +112,6 @@ const Label = styled.div`
   flex-direction: row;
   margin-right: 8px;
   height: ${ROW_HEIGHT}px;
-`;
-
-const ScalarValue = styled.div`
-  display: flex;
-  flex-direction: column;
 `;
 
 export default Node;

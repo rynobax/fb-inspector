@@ -21,7 +21,7 @@ const Header: React.FC<HeaderProps> = props => {
   const open = modal !== 'closed';
 
   return (
-    <Bar id="bar">
+    <Bar>
       <Content>
         <Menu>
           <ProjectButton>
