@@ -19,6 +19,9 @@
   },
   "devDependencies": {
     "@types/got": "^9.6.0",
+    "@types/reach__dialog": "^0.1.0",
+    "@types/reach__menu-button": "^0.1.0",
+    "@types/reach__router": "^1.2.4",
     "@types/react": "^16.8.22",
     "@types/react-dom": "^16.8.4",
     "@types/react-window": "^1.8.0",

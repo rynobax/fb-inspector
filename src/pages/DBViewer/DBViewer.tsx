@@ -6,7 +6,11 @@ import Header from './Header';
 import Body from './Body';
 import FirebaseErrorBoundary from './FirebaseErrorBoundary';
 
-function Main() {
+interface DBViewerProps {
+  path: string;
+}
+
+const DBViewer: React.FC<DBViewerProps> = () => {
   return (
     <Container>
       <HeaderContainer>
@@ -19,7 +23,7 @@ function Main() {
       </BodyContainer>
     </Container>
   );
-}
+};
 
 const Container = styled.div`
   display: flex;
@@ -39,4 +43,4 @@ const BodyContainer = styled.div`
   display: flex;
 `;
 
-export default Main;
+export default DBViewer;

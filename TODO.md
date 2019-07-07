@@ -10,6 +10,7 @@ show uids as time
 search within view
 preload if nothing else to do
 save open state in projects
+link to real firebase for editing
 
 - maybe -
 hyperlinks between uids and stuff

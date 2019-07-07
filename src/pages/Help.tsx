@@ -1,9 +1,11 @@
 import React from 'react';
 
-interface HelpProps {}
+interface HelpProps {
+  path: string;
+}
 
 const Help: React.FC<HelpProps> = () => {
-  return <div>This is the help page</div>;
+  return <h2 style={{ textAlign: 'center' }}>This is the help page</h2>;
 };
 
 export default Help;
