@@ -37,10 +37,6 @@ export const PathProvider: React.FC<PathProviderProps> = props => {
 
   const pathStr = pathToString(path);
 
-  useEffect(() => {
-    resetOpen();
-  }, [pathStr]);
-
   return (
     <PathContext.Provider value={{ path, setPath, pathStr }}>
       {props.children}
@@ -96,8 +92,10 @@ export const usePathArr = () => {
   const { path } = usePath();
   const [childrenPath, setChildrenPath] = useState(() => getChildrenPath(path));
   useEffect(() => {
+    const updatePath = () => setChildrenPath(getChildrenPath(path));
+    updatePath();
     return openState.observe(() => {
-      setChildrenPath(getChildrenPath(path));
+      updatePath();
     });
   }, [path]);
   return childrenPath;
