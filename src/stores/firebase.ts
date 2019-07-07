@@ -40,6 +40,7 @@ interface ErrorObj {
 export const openState = observable.map<string, boolean>({});
 
 export const resetStores = () => {
+  console.log('resetting stores');
   openState.clear();
   dataStore.clear();
 };

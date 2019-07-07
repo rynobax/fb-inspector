@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { navigate } from '@reach/router';
 
 import { useSettings } from './settings';
@@ -48,10 +48,17 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = props => {
   const project =
     settings.projects.find(p => p.__id === props.selectedProjectId) || null;
 
+  const projectId = project ? project.__id : null;
+  const firstUpdate = useRef(true);
   useEffect(() => {
+    // Don't run on first render
+    if (firstUpdate.current) {
+      firstUpdate.current = false;
+      return;
+    }
     // Reset stores when project changes
     resetStores();
-  }, [project])
+  }, [projectId])
 
   useEffect(() => {
     document.title = project ? `${project.name}` : 'fb-inspector';

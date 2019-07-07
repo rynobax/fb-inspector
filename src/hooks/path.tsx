@@ -45,7 +45,7 @@ export const useIsPathOpen = (path: string[]) => {
   useEffect(() => {
     const initial = openState.get(pathStr);
     if (!initial) openState.set(pathStr, false);
-    return observe(openState, pathStr, change => setOpen(change.newValue));
+    return observe(openState, pathStr, change => setOpen(!!change.newValue));
   }, [pathStr]);
   return { open, toggle };
 };
