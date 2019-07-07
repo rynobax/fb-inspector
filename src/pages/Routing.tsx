@@ -5,9 +5,7 @@ import Error404 from './Error404';
 import Help from './Help';
 import Project from 'components/Project';
 
-interface RoutingProps {}
-
-const Routing: React.FC<RoutingProps> = props => {
+const Routing: React.FC = () => {
   return (
     <Router>
       <Project path="project/*" />

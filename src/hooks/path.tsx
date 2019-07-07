@@ -29,10 +29,10 @@ function noUri(): string[] {
 export const PathProvider: React.FC<PathProviderProps> = props => {
   const full = props.uri ? props.uri.split('/') : noUri();
   const dataNdx = full.indexOf('data');
-  const path = dataNdx === -1 ? [] : full.slice(dataNdx + 1);
-  const setPath = (path: string[]) => {
+  const path = dataNdx === -1 ? [] : full.slice(dataNdx + 1).filter(e => !!e);
+  const setPath = (newPath: string[]) => {
     const [project] = full.slice(2, 3);
-    navigate(`/project/${project}/data/${path.join('/')}`);
+    navigate(`/project/${project}/data/${newPath.join('/')}`);
   };
 
   const pathStr = pathToString(path);
@@ -100,6 +100,5 @@ export const usePathArr = () => {
       setChildrenPath(getChildrenPath(path));
     });
   }, [path]);
-  console.log({ path, len: childrenPath.length });
   return childrenPath;
 };
