@@ -37,14 +37,14 @@ interface ErrorObj {
   error: Error;
 }
 
-export const openState = observable.map<string, boolean>({});
+export const openStore = observable.map<string, boolean>({});
 
 // Observer will not fire on clear, so we set a key to force it
 
 export const resetOpen = () => {
   console.log('resetting open store');
-  openState.clear();
-  openState.set('$$$$_fire_observer', true);
+  openStore.clear();
+  openStore.set('$$$$_fire_observer', true);
 };
 
 const resetProm = new Promise<void>(r => r);
@@ -61,6 +61,6 @@ export const resetData = () => {
 
 // Print
 (window as any).printStores = () => {
-  console.log(JSON.parse(JSON.stringify(openState)));
+  console.log(JSON.parse(JSON.stringify(openStore)));
   console.log(JSON.parse(JSON.stringify(dataStore)));
 }

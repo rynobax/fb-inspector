@@ -66,13 +66,13 @@ const Body: React.FC<BodyProps> = props => {
           >
             {({ index, style }) => {
               const path = openPaths[index];
-              return <Node path={path} key={path.join('/')} style={style} />;
+              return <Node path={path} key={path.join('/')} style={style} ndx={index} />;
             }}
           </List>
         ) : (
           <SuspenseList revealOrder="forwards">
-            {openPaths.map(path => {
-              return <Node path={path} key={path.join('/')} style={{}} />;
+            {openPaths.map((path, i) => {
+              return <Node path={path} key={path.join('/')} style={{}} ndx={i} />;
             })}
           </SuspenseList>
         )}

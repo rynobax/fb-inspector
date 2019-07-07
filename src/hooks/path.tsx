@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { observe } from 'mobx';
 import { navigate } from '@reach/router';
 
-import { openState, dataStore, resetOpen } from 'stores/firebase';
+import { openStore, dataStore } from 'stores/firebase';
 
 interface PathContextType {
   path: string[];
@@ -53,17 +53,24 @@ export const usePath = () => {
   return { path, pathStr, setPath };
 };
 
-export const useIsPathOpen = (path: string[]) => {
+export const useIsPathOpen = (path: string[], initialVal: boolean) => {
   const pathStr = pathToString(path);
-  const [open, setOpen] = useState(() => !!openState.get(pathStr));
-  const toggle = () => {
-    openState.set(pathStr, !open);
-  };
+
+  const [open, setOpen] = useState(() => {
+    const cached = openStore.get(pathStr);
+    return cached === undefined ? initialVal : cached;
+  });
+
   useEffect(() => {
-    const initial = openState.get(pathStr);
-    if (!initial) openState.set(pathStr, false);
-    return observe(openState, pathStr, change => setOpen(!!change.newValue));
-  }, [pathStr]);
+    const initial = openStore.get(pathStr);
+    if (!initial) openStore.set(pathStr, initialVal);
+    return observe(openStore, pathStr, change => setOpen(!!change.newValue));
+  }, [pathStr, initialVal]);
+
+  const toggle = () => {
+    openStore.set(pathStr, !open);
+  };
+
   return { open, toggle };
 };
 
@@ -76,10 +83,13 @@ function getChildrenPath(initialPath: string[]): string[][] {
   const { value } = initialData;
   if (typeof value !== 'object' || !value) return [initialPath];
 
-  const isOpen = openState.get(pathStr);
+  const isOpen = openStore.get(pathStr);
   if (!isOpen) return [initialPath];
 
-  return Object.keys(value).reduce(
+  const keys = Object.keys(value);
+  keys.sort((a, b) => a.localeCompare(b));
+
+  return keys.reduce(
     (acc, k) => {
       const newPath = [...initialPath, k];
       return [...acc, ...getChildrenPath(newPath)];
@@ -94,9 +104,18 @@ export const usePathArr = () => {
   useEffect(() => {
     const updatePath = () => setChildrenPath(getChildrenPath(path));
     updatePath();
-    return openState.observe(() => {
+    const openCleanup = openStore.observe(() => {
       updatePath();
     });
+
+    const dataCleanup = dataStore.observe(() => {
+      updatePath();
+    });
+
+    return () => {
+      openCleanup();
+      dataCleanup();
+    }
   }, [path]);
   return childrenPath;
 };

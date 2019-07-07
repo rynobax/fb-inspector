@@ -49,10 +49,11 @@ const SuspendedExpand: React.FC<{
 interface NodeProps {
   path: string[];
   style: React.CSSProperties;
+  ndx: number;
 }
 
-const Node: React.FC<NodeProps> = memo(({ path, style }) => {
-  const { open, toggle } = useIsPathOpen(path);
+const Node: React.FC<NodeProps> = memo(({ path, style, ndx }) => {
+  const { open, toggle } = useIsPathOpen(path, ndx === 0);
   const { setPath } = usePath();
   const key = path[path.length - 1] || '/';
   usePrimeFirebase(path);
