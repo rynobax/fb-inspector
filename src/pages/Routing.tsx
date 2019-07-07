@@ -10,8 +10,7 @@ interface RoutingProps {}
 const Routing: React.FC<RoutingProps> = props => {
   return (
     <Router>
-      <Project path="project" />
-      <Project path="project/:projectId" />
+      <Project path="project/*" />
       <Help path="help" />
       <Error404 default />
     </Router>

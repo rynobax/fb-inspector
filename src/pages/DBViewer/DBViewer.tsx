@@ -7,9 +7,10 @@ import Header from './Header';
 import Body from './Body';
 import FirebaseErrorBoundary from './FirebaseErrorBoundary';
 
-type DBViewerProps = RouteComponentProps<{ projectId: string }>;
+type DBViewerProps = RouteComponentProps<{ rootPath: string }>;
 
 const DBViewer: React.FC<DBViewerProps> = (props) => {
+  console.log(props.rootPath);
   return (
     <Container>
       <HeaderContainer>

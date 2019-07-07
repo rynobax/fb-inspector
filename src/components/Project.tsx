@@ -1,15 +1,26 @@
 import React from 'react';
 import DBViewer from 'pages/DBViewer';
-import { RouteComponentProps } from '@reach/router';
+import { RouteComponentProps, Router } from '@reach/router';
 import { ProjectProvider } from 'hooks/project';
 
-type ProjectProps = RouteComponentProps<{ projectId: string }>;
-
-const Project: React.FC<ProjectProps> = ({ projectId }) => {
+const Project: React.FC<RouteComponentProps> = () => {
   return (
-    <ProjectProvider selectedProjectId={projectId} >
-      <DBViewer path="/" />
-      <DBViewer path=":projectId" />
+    <Router>
+      <ProjectRoutes path="/" />
+      <ProjectRoutes path=":projectId/*" />
+    </Router>
+  );
+};
+
+const ProjectRoutes: React.FC<
+  RouteComponentProps<{ projectId: string }>
+> = ({ projectId }) => {
+  return (
+    <ProjectProvider selectedProjectId={projectId}>
+      <Router>
+        <DBViewer default />
+        <DBViewer path="/data/:rootPath" />
+      </Router>
     </ProjectProvider>
   );
 };
