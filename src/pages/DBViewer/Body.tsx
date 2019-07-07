@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import styled from 'styled-components';
 
-import Node, { ROW_HEIGHT } from 'components/Node';
+import Node, { ROW_HEIGHT } from './Node';
 
 import { usePath, usePathArr } from 'hooks/path';
 import { useProject } from 'hooks/project';

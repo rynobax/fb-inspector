@@ -1,5 +1,8 @@
 - now -
 keep url in sync
+/project/project-name-or-id/path
+/help
+/blah
 
 - future -
 

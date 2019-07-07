@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 
-import Main from 'components/Main';
+import Main from 'pages/DBViewer';
 import { PathProvider } from 'hooks/path';
 import { ProjectProvider } from 'hooks/project';
 import TopLevelErrorBoundary from 'components/TopLevelErrorBoundary';
