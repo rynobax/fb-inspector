@@ -1,8 +1,9 @@
 import { useReducer } from 'react';
+import produce from 'immer';
+
 import { Project } from './project';
 import useLocalStorage from './localstore';
-import produce from 'immer';
-import { resetStore } from './firebase';
+import { resetStores } from 'stores/firebase';
 
 interface Settings {
   projects: Project[];
@@ -54,7 +55,7 @@ function getUpdatedState(state: Settings, action: SettingsAction) {
         );
       });
     case 'select':
-      resetStore();
+      resetStores();
       return produce(state, s => {
         s.selectedProject = action.id;
       });

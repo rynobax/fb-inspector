@@ -25,7 +25,6 @@ const Body: React.FC<BodyProps> = props => {
   const openPaths = usePathArr();
   const contentRef = useRef<HTMLDivElement>(null);
   const size = useComponentSize(contentRef);
-  console.log(size);
 
   function pathAt(i: number) {
     if (i === 0) return [];

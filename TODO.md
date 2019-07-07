@@ -1,5 +1,4 @@
 - now -
-switching projects work
 keep url in sync
 
 - future -
@@ -7,6 +6,7 @@ keep url in sync
 show uids as time
 search within view
 preload if nothing else to do
+save open state in projects
 
 - maybe -
 hyperlinks between uids and stuff

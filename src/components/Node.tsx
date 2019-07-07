@@ -4,8 +4,9 @@ import styled from 'styled-components';
 import Add from 'icons/Add';
 import Remove from 'icons/Remove';
 
-import { useFirebase, FirebaseValue, usePrimeFirebase } from 'hooks/firebase';
+import { useFirebase, usePrimeFirebase } from 'hooks/firebase';
 import { usePath, useIsPathOpen } from 'hooks/path';
+import { FirebaseValue } from 'stores/firebase';
 
 export const ROW_HEIGHT = 32;
 

@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { useSettings } from './settings';
 
 export interface Project {
@@ -36,11 +36,14 @@ const ProjectContext = createContext<ProjectContextType>({
 });
 
 export const ProjectProvider: React.FC = ({ children }) => {
-  // Project
   const [settings, dispatch] = useSettings();
 
   const project =
     settings.projects.find(p => p.id === settings.selectedProject) || null;
+
+  useEffect(() => {
+    document.title = project ? `${project.name}` : 'fb-inspector';
+  }, [project]);
 
   return (
     <ProjectContext.Provider

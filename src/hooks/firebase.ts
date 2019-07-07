@@ -1,15 +1,9 @@
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import got from 'got';
-import { observable } from 'mobx';
 
 import { Project, useProject } from './project';
 import { pathToString } from './path';
-
-type FirebaseScalar = string | number | boolean;
-interface FirebaseObject {
-  [key: string]: FirebaseScalar;
-}
-export type FirebaseValue = null | FirebaseScalar | FirebaseObject;
+import { dataStore, FirebaseValue, Status } from 'stores/firebase';
 
 function params(obj: { [k: string]: string | boolean }) {
   let str = '';
@@ -37,40 +31,7 @@ async function queryData(
   return JSON.parse(data.body);
 }
 
-type StoreObj = PendingObj | SuccessObj | ErrorObj;
-
-enum Status {
-  PENDING,
-  ERROR,
-  SUCCESS,
-}
-
-interface PendingObj {
-  status: Status.PENDING;
-  prom: Promise<void>;
-  value: null;
-  error: null;
-}
-
-interface SuccessObj {
-  status: Status.SUCCESS;
-  prom: Promise<void>;
-  value: FirebaseValue;
-  error: null;
-}
-
-interface ErrorObj {
-  status: Status.ERROR;
-  prom: Promise<void>;
-  value: null;
-  error: Error;
-}
-
-export const dataStore = observable.map<string, StoreObj>({});
-
-export const resetStore = () => dataStore.clear();
-
-const wait = (ms: number) => new Promise(r => setTimeout(() => r(), ms));
+// const wait = (ms: number) => new Promise(r => setTimeout(() => r(), ms));
 
 function initiateRequest(project: Project, pathStr: string) {
   const val = dataStore.get(pathStr);

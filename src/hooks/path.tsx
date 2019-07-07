@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { observable, observe } from 'mobx';
-import { dataStore } from './firebase';
+import { observe } from 'mobx';
+import { openState, dataStore } from 'stores/firebase';
 
 interface PathContextType {
   path: string[];
@@ -16,6 +16,9 @@ const PathContext = createContext<PathContextType>({
 
 export const PathProvider: React.FC = ({ children }) => {
   const [path, setPath] = useState<string[]>([]);
+  useEffect(() => {
+    document.title = path.join();
+  }, [path]);
   return (
     <PathContext.Provider value={{ path, setPath }}>
       {children}
@@ -32,8 +35,6 @@ export const usePath = () => {
   const pathStr = pathToString(path);
   return { path, pathStr, setPath };
 };
-
-const openState = observable.map<string, boolean>({});
 
 export const useIsPathOpen = (path: string[]) => {
   const pathStr = pathToString(path);
