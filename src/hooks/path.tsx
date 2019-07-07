@@ -14,14 +14,15 @@ const PathContext = createContext<PathContextType>({
   },
 });
 
-export const PathProvider: React.FC = ({ children }) => {
-  const [path, setPath] = useState<string[]>([]);
-  useEffect(() => {
-    document.title = path.join();
-  }, [path]);
+interface PathProviderProps {
+  rootPath: string[];
+}
+
+export const PathProvider: React.FC<PathProviderProps> = props => {
+  const [path, setPath] = useState<string[]>(props.rootPath);
   return (
     <PathContext.Provider value={{ path, setPath }}>
-      {children}
+      {props.children}
     </PathContext.Provider>
   );
 };

@@ -1,7 +1,6 @@
 import React, { Suspense } from 'react';
 
 import Routing from 'pages/Routing';
-import { PathProvider } from 'hooks/path';
 import TopLevelErrorBoundary from 'components/TopLevelErrorBoundary';
 
 const Setup: React.FC = () => {
@@ -9,9 +8,7 @@ const Setup: React.FC = () => {
     <React.StrictMode>
       <TopLevelErrorBoundary>
         <Suspense fallback={<div>Fallback</div>}>
-          <PathProvider>
-            <Routing />
-          </PathProvider>
+          <Routing />
         </Suspense>
       </TopLevelErrorBoundary>
     </React.StrictMode>

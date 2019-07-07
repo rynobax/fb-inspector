@@ -6,22 +6,29 @@ import Header from './Header';
 
 import Body from './Body';
 import FirebaseErrorBoundary from './FirebaseErrorBoundary';
+import { PathProvider } from 'hooks/path';
 
-type DBViewerProps = RouteComponentProps<{ rootPath: string }>;
+type DBViewerProps = RouteComponentProps;
 
-const DBViewer: React.FC<DBViewerProps> = (props) => {
-  console.log(props.rootPath);
+const DBViewer: React.FC<DBViewerProps> = props => {
+  const full = props.uri ? props.uri.split('/') : [];
+  const dataNdx = full.indexOf('data');
+  const rootPath = dataNdx === -1 ? [] : full.slice(dataNdx + 1);
+
+  console.log({ rootPath, full, dataNdx });
   return (
-    <Container>
-      <HeaderContainer>
-        <Header />
-      </HeaderContainer>
-      <BodyContainer>
-        <FirebaseErrorBoundary>
-          <Body />
-        </FirebaseErrorBoundary>
-      </BodyContainer>
-    </Container>
+    <PathProvider rootPath={rootPath}>
+      <Container>
+        <HeaderContainer>
+          <Header />
+        </HeaderContainer>
+        <BodyContainer>
+          <FirebaseErrorBoundary>
+            <Body />
+          </FirebaseErrorBoundary>
+        </BodyContainer>
+      </Container>
+    </PathProvider>
   );
 };
 

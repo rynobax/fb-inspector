@@ -19,7 +19,6 @@ const ProjectRoutes: React.FC<
     <ProjectProvider selectedProjectId={projectId}>
       <Router>
         <DBViewer default />
-        <DBViewer path="/data/:rootPath" />
       </Router>
     </ProjectProvider>
   );
