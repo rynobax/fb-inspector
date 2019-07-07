@@ -40,11 +40,11 @@ const AddProject: React.FC<AddProjectProps> = props => {
       <CloseButton onClick={props.close}>
         <Close size={30} />
       </CloseButton>
-      <Label>Name*</Label>
+      <Label>Name* (Can be anything)</Label>
       <Input value={name} onChange={e => setName(e.target.value)} />
       <Label>Project URL*</Label>
       <Input value={id} onChange={e => setId(e.target.value)} />
-      <Label>Legacy token</Label>
+      <Label>Legacy token (required if not public read)</Label>
       <Input value={legacyToken} onChange={e => setLegacyToken(e.target.value)} />
       <div>
         <FinishButton onClick={submit}>Save</FinishButton>

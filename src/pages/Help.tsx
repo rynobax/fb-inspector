@@ -1,8 +1,7 @@
 import React from 'react';
+import { RouteComponentProps } from '@reach/router';
 
-interface HelpProps {
-  path: string;
-}
+type HelpProps = RouteComponentProps;
 
 const Help: React.FC<HelpProps> = () => {
   return <h2 style={{ textAlign: 'center' }}>This is the help page</h2>;

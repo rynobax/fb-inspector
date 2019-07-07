@@ -1,8 +1,7 @@
 import React from 'react';
+import { RouteComponentProps } from '@reach/router';
 
-interface Error404Props {
-  default: true;
-}
+type Error404Props = RouteComponentProps;
 
 const Error404: React.FC<Error404Props> = () => {
   return <h1 style={{ textAlign: 'center' }}>404 not found!</h1>;

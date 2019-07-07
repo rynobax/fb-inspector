@@ -1,16 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
+import { RouteComponentProps } from '@reach/router';
 
 import Header from './Header';
 
 import Body from './Body';
 import FirebaseErrorBoundary from './FirebaseErrorBoundary';
 
-interface DBViewerProps {
-  path: string;
-}
+type DBViewerProps = RouteComponentProps<{ projectId: string }>;
 
-const DBViewer: React.FC<DBViewerProps> = () => {
+const DBViewer: React.FC<DBViewerProps> = (props) => {
   return (
     <Container>
       <HeaderContainer>
