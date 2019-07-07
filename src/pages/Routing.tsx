@@ -11,7 +11,7 @@ const Routing: React.FC<RoutingProps> = props => {
   return (
     <Router>
       <Project path="project" />
-      <Project path="project/:project" />
+      <Project path="project/:projectId" />
       <Help path="help" />
       <Error404 default />
     </Router>

@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useEffect } from 'react';
+import { navigate } from '@reach/router';
+
 import { useSettings } from './settings';
+import { resetStores } from 'stores/firebase';
 
 export interface Project {
   // Used internally to keep track
@@ -13,7 +16,7 @@ interface ProjectContextType {
   project: Project | null;
   projects: Project[];
   selectProject: (id: string) => void;
-  addProject: (project: Project) => void;
+  addProject: (project: Omit<Project, '__id'>) => void;
   updateProject: (project: Project) => void;
   removeProject: (id: string) => void;
 }
@@ -35,11 +38,20 @@ const ProjectContext = createContext<ProjectContextType>({
   },
 });
 
-export const ProjectProvider: React.FC = ({ children }) => {
+interface ProjectProviderProps {
+  selectedProjectId: string | undefined;
+}
+
+export const ProjectProvider: React.FC<ProjectProviderProps> = props => {
   const [settings, dispatch] = useSettings();
 
   const project =
-    settings.projects.find(p => p.id === settings.selectedProject) || null;
+    settings.projects.find(p => p.__id === props.selectedProjectId) || null;
+
+  useEffect(() => {
+    // Reset stores when project changes
+    resetStores();
+  }, [project])
 
   useEffect(() => {
     document.title = project ? `${project.name}` : 'fb-inspector';
@@ -51,12 +63,12 @@ export const ProjectProvider: React.FC = ({ children }) => {
         project,
         projects: settings.projects,
         addProject: project => dispatch({ type: 'add', project }),
-        selectProject: id => dispatch({ type: 'select', id }),
+        selectProject: id => navigate(`/project/${id}`),
         updateProject: project => dispatch({ type: 'update', project }),
         removeProject: id => dispatch({ type: 'remove', id }),
       }}
     >
-      {children}
+      {props.children}
     </ProjectContext.Provider>
   );
 };

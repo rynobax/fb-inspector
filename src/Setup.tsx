@@ -2,7 +2,6 @@ import React, { Suspense } from 'react';
 
 import Routing from 'pages/Routing';
 import { PathProvider } from 'hooks/path';
-import { ProjectProvider } from 'hooks/project';
 import TopLevelErrorBoundary from 'components/TopLevelErrorBoundary';
 
 const Setup: React.FC = () => {
@@ -11,9 +10,7 @@ const Setup: React.FC = () => {
       <TopLevelErrorBoundary>
         <Suspense fallback={<div>Fallback</div>}>
           <PathProvider>
-            <ProjectProvider>
-              <Routing />
-            </ProjectProvider>
+            <Routing />
           </PathProvider>
         </Suspense>
       </TopLevelErrorBoundary>

@@ -3,16 +3,13 @@ import produce from 'immer';
 
 import { Project } from './project';
 import useLocalStorage from './localstore';
-import { resetStores } from 'stores/firebase';
 
 interface Settings {
   projects: Project[];
-  selectedProject: string | null;
 }
 
 const initalSettings: Settings = {
   projects: [],
-  selectedProject: null,
 };
 
 interface Select {
@@ -22,7 +19,7 @@ interface Select {
 
 interface Add {
   type: 'add';
-  project: Project;
+  project: Omit<Project, '__id'>;
 }
 
 interface Remove {
@@ -41,8 +38,10 @@ function getUpdatedState(state: Settings, action: SettingsAction) {
   switch (action.type) {
     case 'add':
       return produce(state, s => {
-        s.projects.push(action.project);
-        s.selectedProject = action.project.__id;
+        s.projects.push({
+          ...action.project,
+          __id: getIdFromProject(action.project),
+        });
       });
     case 'remove':
       return produce(state, s => {
@@ -51,16 +50,17 @@ function getUpdatedState(state: Settings, action: SettingsAction) {
     case 'update':
       return produce(state, s => {
         s.projects = s.projects.map(p =>
-          p.__id === action.project.__id ? action.project : p
+          p.__id === action.project.__id
+            ? { ...action.project, __id: getIdFromProject(action.project) }
+            : p
         );
-      });
-    case 'select':
-      resetStores();
-      return produce(state, s => {
-        s.selectedProject = action.id;
       });
   }
   return state;
+}
+
+function getIdFromProject(project: Omit<Project, '__id'>) {
+  return project.name.toLowerCase();
 }
 
 export const useSettings = () => {

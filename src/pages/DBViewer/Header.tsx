@@ -33,7 +33,7 @@ const Header: React.FC<HeaderProps> = props => {
               const selectedMark =
                 project && project.__id === p.__id ? '> ' : '';
               return (
-                <MenuItem key={p.id} onSelect={() => selectProject(p.id)}>
+                <MenuItem key={p.id} onSelect={() => selectProject(p.__id)}>
                   {selectedMark}{p.name}
                 </MenuItem>
               );

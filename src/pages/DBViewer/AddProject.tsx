@@ -24,8 +24,7 @@ const AddProject: React.FC<AddProjectProps> = props => {
     if (props.editing && project) {
       updateProject({ ...project, name, legacyToken });
     } else {
-      const __id = String(Date.now());
-      addProject({ __id, id, name, legacyToken });
+      addProject({ id, name, legacyToken });
     }
     props.close();
     setName('');
