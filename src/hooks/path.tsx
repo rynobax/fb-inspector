@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { observable, observe } from 'mobx';
 import { dataStore } from './firebase';
 
@@ -7,12 +7,21 @@ interface PathContextType {
   setPath: (path: string[]) => void;
 }
 
-export const PathContext = createContext<PathContextType>({
+const PathContext = createContext<PathContextType>({
   path: [],
   setPath: () => {
     throw Error('updatePath not initalized!');
   },
 });
+
+export const PathProvider: React.FC = ({ children }) => {
+  const [path, setPath] = useState<string[]>([]);
+  return (
+    <PathContext.Provider value={{ path, setPath }}>
+      {children}
+    </PathContext.Provider>
+  );
+};
 
 export function pathToString(path: string[]) {
   return path.length === 0 ? '/' : `/${path.join('/')}`;

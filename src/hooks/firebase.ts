@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react';
 import got from 'got';
 import { observable } from 'mobx';
 
-import { ProjectContext, Project } from './project';
+import { Project, useProject } from './project';
 import { pathToString } from './path';
 
 type FirebaseScalar = string | number | boolean;
@@ -111,7 +111,7 @@ function initiateRequest(project: Project, pathStr: string) {
 }
 
 export const useFirebase = (path: string[]): FirebaseValue => {
-  const { project } = useContext(ProjectContext);
+  const { project } = useProject();
   if (!project) throw Error('Trying to use firebase with no project selected!');
 
   const pathStr = pathToString(path);
@@ -136,7 +136,7 @@ export const useFirebase = (path: string[]): FirebaseValue => {
 };
 
 export const usePrimeFirebase = (path: string[]) => {
-  const { project } = useContext(ProjectContext);
+  const { project } = useProject();
   if (!project) throw Error('Trying to use firebase with no project selected!');
   const pathStr = pathToString(path);
   useEffect(() => {
