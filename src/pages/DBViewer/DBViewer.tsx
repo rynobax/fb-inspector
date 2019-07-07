@@ -11,13 +11,8 @@ import { PathProvider } from 'hooks/path';
 type DBViewerProps = RouteComponentProps;
 
 const DBViewer: React.FC<DBViewerProps> = props => {
-  const full = props.uri ? props.uri.split('/') : [];
-  const dataNdx = full.indexOf('data');
-  const rootPath = dataNdx === -1 ? [] : full.slice(dataNdx + 1);
-
-  console.log({ rootPath, full, dataNdx });
   return (
-    <PathProvider rootPath={rootPath}>
+    <PathProvider uri={props.uri}>
       <Container>
         <HeaderContainer>
           <Header />

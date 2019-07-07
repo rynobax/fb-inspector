@@ -1,27 +1,48 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { observe } from 'mobx';
-import { openState, dataStore } from 'stores/firebase';
+import { navigate } from '@reach/router';
+
+import { openState, dataStore, resetOpen } from 'stores/firebase';
 
 interface PathContextType {
   path: string[];
+  pathStr: string;
   setPath: (path: string[]) => void;
 }
 
 const PathContext = createContext<PathContextType>({
   path: [],
+  pathStr: '/',
   setPath: () => {
     throw Error('updatePath not initalized!');
   },
 });
 
 interface PathProviderProps {
-  rootPath: string[];
+  uri: string | undefined;
+}
+
+function noUri(): string[] {
+  throw Error('no uri');
 }
 
 export const PathProvider: React.FC<PathProviderProps> = props => {
-  const [path, setPath] = useState<string[]>(props.rootPath);
+  const full = props.uri ? props.uri.split('/') : noUri();
+  const dataNdx = full.indexOf('data');
+  const path = dataNdx === -1 ? [] : full.slice(dataNdx + 1);
+  const setPath = (path: string[]) => {
+    const [project] = full.slice(2, 3);
+    navigate(`/project/${project}/data/${path.join('/')}`);
+  };
+
+  const pathStr = pathToString(path);
+
+  useEffect(() => {
+    resetOpen();
+  }, [pathStr]);
+
   return (
-    <PathContext.Provider value={{ path, setPath }}>
+    <PathContext.Provider value={{ path, setPath, pathStr }}>
       {props.children}
     </PathContext.Provider>
   );
@@ -32,8 +53,7 @@ export function pathToString(path: string[]) {
 }
 
 export const usePath = () => {
-  const { path, setPath } = useContext(PathContext);
-  const pathStr = pathToString(path);
+  const { path, setPath, pathStr } = useContext(PathContext);
   return { path, pathStr, setPath };
 };
 
@@ -76,7 +96,10 @@ export const usePathArr = () => {
   const { path } = usePath();
   const [childrenPath, setChildrenPath] = useState(() => getChildrenPath(path));
   useEffect(() => {
-    return openState.observe(() => setChildrenPath(getChildrenPath(path)));
+    return openState.observe(() => {
+      setChildrenPath(getChildrenPath(path));
+    });
   }, [path]);
+  console.log({ path, len: childrenPath.length });
   return childrenPath;
 };

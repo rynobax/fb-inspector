@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { navigate } from '@reach/router';
 
 import { useSettings } from './settings';
-import { resetStores } from 'stores/firebase';
+import { resetData, resetOpen } from 'stores/firebase';
 
 export interface Project {
   // Used internally to keep track
@@ -57,8 +57,9 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = props => {
       return;
     }
     // Reset stores when project changes
-    resetStores();
-  }, [projectId])
+    resetData();
+    resetOpen();
+  }, [projectId]);
 
   useEffect(() => {
     document.title = project ? `${project.name}` : 'fb-inspector';

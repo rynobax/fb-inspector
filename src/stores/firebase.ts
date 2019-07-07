@@ -39,8 +39,20 @@ interface ErrorObj {
 
 export const openState = observable.map<string, boolean>({});
 
-export const resetStores = () => {
-  console.log('resetting stores');
+export const resetOpen = () => {
+  console.log('resetting open store');
   openState.clear();
+  openState.set('$$$$_fire_observer', true);
+};
+
+const resetProm = new Promise<void>(r => r);
+export const resetData = () => {
+  console.log('resetting data store');
   dataStore.clear();
+  dataStore.set('$$$$_fire_observer', {
+    prom: resetProm,
+    status: Status.SUCCESS,
+    value: true,
+    error: null,
+  });
 };
