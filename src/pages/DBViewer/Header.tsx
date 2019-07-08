@@ -8,7 +8,8 @@ import ChevronDown from 'icons/ChevronDown';
 import Add from 'icons/Add';
 import Edit from 'icons/Edit';
 
-import AddProject from './AddProject';
+import AddProject from 'components/AddProject';
+import { openOathRegister } from 'services/oauth';
 
 type OpenValues = 'closed' | 'editing' | 'adding';
 
@@ -44,7 +45,7 @@ const Header: React.FC<HeaderProps> = props => {
               <div style={{ width: 3 }} />
               Edit Selected Project
             </MenuItem>
-            <MenuItem onSelect={() => setModal('adding')}>
+            <MenuItem onSelect={() => openOathRegister()}>
               <Add size={24} />
               New Project
             </MenuItem>

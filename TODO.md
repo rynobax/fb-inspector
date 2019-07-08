@@ -1,13 +1,14 @@
 - now -
-
+log in with various user accounts
+show all projects from all accounts
+keep track of which user to use in the project
+use token to make requests
 
 - future -
-
-link to real firebase for editing
-can use firebase api to get projects
 search within view
 better ui for path editing not in url
 show tooltip with uid as time
+link to real firebase for editing
 -- release --
 for projects, store added time for consistant sorting
 Warning: The following components suspended during a user-blocking update: SuspendedExpand, SuspendedValue

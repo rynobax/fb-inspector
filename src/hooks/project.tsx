@@ -70,10 +70,10 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = props => {
       value={{
         project,
         projects: settings.projects,
-        addProject: project => dispatch({ type: 'add', project }),
+        addProject: project => dispatch({ type: 'project-add', project }),
         selectProject: id => navigate(`/project/${id}`),
-        updateProject: project => dispatch({ type: 'update', project }),
-        removeProject: id => dispatch({ type: 'remove', id }),
+        updateProject: project => dispatch({ type: 'project-update', project }),
+        removeProject: id => dispatch({ type: 'project-remove', id }),
       }}
     >
       {props.children}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog } from '@reach/dialog';
 import styled from 'styled-components';
+
 import Close from 'icons/Close';
 import { useProject } from 'hooks/project';
 

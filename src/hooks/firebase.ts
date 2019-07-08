@@ -26,6 +26,8 @@ async function queryData(
     `https://${id}.firebaseio.com/${path}.json${params({
       shallow: true,
       auth: legacyToken,
+      // access_token:
+      //   'ya29.Gls_ByWYzDc6RNpqkwYjLdWECnmtlOBaFpmTlfkJowYaZt-cp3jx8B9M7i-TJiNXjFGp_YTXSaZ-JmYijcvmUn-5Hi3LdKRqPe4Cc9acglDCH6E0Cn4bzqm7PuZH',
     })}`
   );
   return JSON.parse(data.body);
