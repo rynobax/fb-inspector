@@ -17,7 +17,7 @@ export default function useLocalStorage(
   useInterval(() => {
     const newValue = window.localStorage.getItem(key) || initialValue;
     if (value !== newValue) setValue(newValue);
-  }, pollMs || Number.POSITIVE_INFINITY);
+  }, pollMs || 1000 * 60 * 60);
 
   return [value, setValue];
 }

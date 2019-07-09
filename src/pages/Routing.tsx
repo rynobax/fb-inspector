@@ -1,10 +1,11 @@
 import React from 'react';
-import { Router } from '@reach/router';
+import { Router, RouteComponentProps } from '@reach/router';
 
 import Error404 from './Error404';
 import Help from './Help';
-import Project from 'components/Project';
 import OAuthCatcher from './OAuthCatcher';
+import { ProjectProvider } from 'hooks/project';
+import DBViewer from './DBViewer';
 
 const Routing: React.FC = () => {
   return (
@@ -15,6 +16,28 @@ const Routing: React.FC = () => {
       <OAuthCatcher path="oauth" />
       <Error404 default />
     </Router>
+  );
+};
+
+
+const Project: React.FC<RouteComponentProps> = () => {
+  return (
+    <Router>
+      <ProjectRoutes path="/" />
+      <ProjectRoutes path=":projectId/*" />
+    </Router>
+  );
+};
+
+const ProjectRoutes: React.FC<
+  RouteComponentProps<{ projectId: string }>
+> = ({ projectId }) => {
+  return (
+    <ProjectProvider selectedProjectId={projectId}>
+      <Router>
+        <DBViewer default />
+      </Router>
+    </ProjectProvider>
   );
 };
 

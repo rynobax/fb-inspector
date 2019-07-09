@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useReducer, useEffect } from 'react';
 import produce from 'immer';
 
 import useLocalStorage from './localstore';
@@ -32,16 +32,23 @@ interface ProjectUpdate {
 
 interface GoogleUserAdd {
   type: 'googleuser-add';
-  user: GoogleUser;
+  user: Omit<GoogleUser, '__id'>;
+}
+
+interface Set {
+  type: 'set';
+  settings: Settings;
 }
 
 type SettingsAction =
+  | Set
   | ProjectAdd
   | ProjectRemove
   | ProjectUpdate
   | GoogleUserAdd;
 
 function getUpdatedState(state: Settings, action: SettingsAction) {
+  console.log(action);
   switch (action.type) {
     case 'project-add':
       return produce(state, s => {
@@ -62,25 +69,60 @@ function getUpdatedState(state: Settings, action: SettingsAction) {
             : p
         );
       });
+    case 'googleuser-add':
+      return produce(state, s => {
+        const __id = getIdFromGoogleUser(action.user);
+        const user = {
+          ...action.user,
+          __id,
+        };
+        if (s.users.find(e => e.__id === __id)) {
+          s.users = s.users.map(e => (e.__id === __id ? user : e));
+        } else {
+          s.users.push(user);
+        }
+      });
+    case 'set':
+      return action.settings;
+    default:
+      throw Error(`Unimplemented action: ${(action as SettingsAction).type}`);
   }
-  return state;
+}
+
+function getIdFromGoogleUser(user: Omit<GoogleUser, '__id'>) {
+  return user.email.toLowerCase();
 }
 
 function getIdFromProject(project: Omit<Project, '__id'>) {
   return project.name.toLowerCase();
 }
 
-export const useSettings = () => {
+export const useSettings = (pollMs?: number) => {
   const [settingsJSON, setSettingsJSON] = useLocalStorage(
     'settings',
-    JSON.stringify(initalSettings)
+    JSON.stringify(initalSettings),
+    pollMs
   );
 
-  const initialState: Settings = JSON.parse(settingsJSON);
+  const lsSettings: Settings = JSON.parse(settingsJSON);
 
-  return useReducer((state: Settings, action: SettingsAction) => {
+  const [state, dispatch] = useReducer((state: Settings, action: SettingsAction) => {
     const updatedState = getUpdatedState(state, action);
     setSettingsJSON(JSON.stringify(updatedState));
     return updatedState;
-  }, initialState);
+  }, lsSettings);
+
+  // When adding a user, this will be updated from another window
+  // So we need to manually set the reducer state
+  // It feels like this is inviting a race condition, but
+  // let's see what happens :)
+  const stateStr = JSON.stringify(state);
+  useEffect(() => {
+    if(stateStr !== settingsJSON) {
+      console.log('setting');
+      dispatch({ type: 'set', settings: JSON.parse(settingsJSON) })
+    }
+  }, [stateStr, settingsJSON])
+
+  return [state, dispatch] as [Settings, React.Dispatch<SettingsAction>];
 };

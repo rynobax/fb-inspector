@@ -5,11 +5,10 @@ import { Menu, MenuList, MenuButton, MenuItem } from '@reach/menu-button';
 import { useProject } from 'hooks/project';
 
 import ChevronDown from 'icons/ChevronDown';
-import Add from 'icons/Add';
-import Edit from 'icons/Edit';
+import User from 'icons/User';
 
 import AddProject from 'components/AddProject';
-import { openOathRegister } from 'services/oauth';
+import AccountsModal from 'components/AccountsModal';
 
 type OpenValues = 'closed' | 'editing' | 'adding';
 
@@ -17,9 +16,7 @@ interface HeaderProps {}
 
 const Header: React.FC<HeaderProps> = props => {
   const { projects, project, selectProject } = useProject();
-  const [modal, setModal] = useState<OpenValues>('closed');
-
-  const open = modal !== 'closed';
+  const [open, setOpen] = useState(false);
 
   return (
     <Bar>
@@ -39,24 +36,17 @@ const Header: React.FC<HeaderProps> = props => {
                 </MenuItem>
               );
             })}
-            <MenuItem onSelect={() => setModal('editing')}>
-              <div style={{ width: 3 }} />
-              <Edit size={18} />
-              <div style={{ width: 3 }} />
-              Edit Selected Project
-            </MenuItem>
-            <MenuItem onSelect={() => openOathRegister()}>
-              <Add size={24} />
-              New Project
+            <MenuItem onSelect={() => setOpen(true)}>
+              <User size={24} />
+              Manage Accounts
             </MenuItem>
           </MenuList>
         </Menu>
       </Content>
       {open && (
-        <AddProject
+        <AccountsModal
           open={open}
-          close={() => setModal('closed')}
-          editing={modal === 'editing'}
+          onClose={() => setOpen(false)}
         />
       )}
     </Bar>

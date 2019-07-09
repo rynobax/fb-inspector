@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { RouteComponentProps, Redirect } from '@reach/router';
-import got from 'got';
+import { RouteComponentProps } from '@reach/router';
 import { getOAuthRefreshToken } from 'services/oauth';
 import { useSettings } from 'hooks/settings';
 
 type OAuthProps = RouteComponentProps;
 
 const OAuthCatcher: React.FC<OAuthProps> = props => {
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const dispatch = useSettings()[1];
+  const [settings, dispatch] = useSettings();
 
   if (!props.location) throw Error('No location');
 
-  const { hash } = props.location;
+  const { hash, search } = props.location;
   useEffect(() => {
-    const response = hash
+    const data = hash || search;
+    const response = data
       .slice(1)
       .split('&')
       .reduce<Response>(
@@ -27,31 +28,40 @@ const OAuthCatcher: React.FC<OAuthProps> = props => {
       );
     if (isErrorResponse(response))
       throw Error(`Got response ${response.error}`);
-    const { access_token } = response;
-    getOAuthRefreshToken(access_token)
+    const { access_token, code } = response;
+    const token = access_token || code;
+    if (!token) throw Error('No token!');
+    getOAuthRefreshToken(token)
       .then(res => {
         const middle = res.id_token.split('.')[1];
-        const email = JSON.parse(btoa(middle)).email;
+        const email = JSON.parse(atob(middle)).email;
         const user = { email, refreshToken: res.refresh_token };
         dispatch({ type: 'googleuser-add', user });
         setLoading(false);
+        setEmail(email);
       })
       .catch(err => {
         setError(err);
         setLoading(false);
       });
-  }, [hash, dispatch]);
+  }, [hash, search, dispatch]);
 
   if (loading) return <div>Loading</div>;
   if (error) throw error;
 
+  const settingsReducerProcessing =
+    !email || !settings.users.find(e => e.email === email);
+
+  if (settingsReducerProcessing) return <div>Loading</div>;
+
   // We got what we came for, close window
   window.close();
-  return null;
+  return <div>This window should close automatically</div>;
 };
 
 interface SuccessfulResponse {
-  access_token: string;
+  access_token?: string;
+  code?: string;
   expires_in: string;
   scope: string;
   token_type: string;

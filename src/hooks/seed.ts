@@ -1,4 +1,4 @@
-import got from 'got';
+import key from 'ky';
 import { testBig as db } from '../creds';
 
 function params(obj: { [k: string]: string | boolean }) {
@@ -14,7 +14,7 @@ function params(obj: { [k: string]: string | boolean }) {
 }
 
 async function set(path: string, data: any) {
-  await got.put(
+  await key.put(
     `https://${db.path}.firebaseio.com/${path}.json${params({
       auth: db.token,
     })}`,
@@ -23,7 +23,7 @@ async function set(path: string, data: any) {
 }
 
 async function push(path: string, data: any) {
-  await got.post(
+  await key.post(
     `https://${db.path}.firebaseio.com/${path}.json${params({
       auth: db.token,
     })}`,

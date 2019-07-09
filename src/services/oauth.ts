@@ -1,6 +1,7 @@
-import got from 'got';
+import ky from 'ky';
+import { useSettings } from 'hooks/settings';
 
-const BASE_URL = 'https://localhost:9001';
+const BASE_URL = 'http://localhost:9001';
 
 interface OAuthResponse {
   access_token: string;
@@ -12,16 +13,19 @@ interface OAuthResponse {
 }
 
 export async function getOAuthRefreshToken(access_token: string) {
-  const url = `${BASE_URL}/access_token/${access_token}`;
-  const { body } = await got(url);
-  const data = JSON.parse(body);
-  if (data.error) throw Error(data);
+  const url = `${BASE_URL}/access_token/${encodeURIComponent(access_token)}`;
+  const res = await ky(url);
+  const data = await res.json();
+  if (data.error) {
+    if (data.error_description) throw Error(data.error_description);
+    else throw Error(JSON.stringify(data));
+  }
   return data as OAuthResponse;
 }
 
 const client_id =
   '561478918972-vkd6611959mpitiq8rvs6484dktic5e6.apps.googleusercontent.com';
-const redirect_uri = 'https://ec7b8d95.ngrok.io';
+const redirect_uri = 'https://33d275d7.ngrok.io/oauth';
 // Required for refresh token
 const response_type = 'code';
 // Required for refresh token
@@ -48,4 +52,21 @@ export async function openOathRegister() {
   ];
   const url = `https://accounts.google.com/o/oauth2/v2/auth?${parts.join('&')}`;
   window.open(url, 'oath', 'height=600,width=600');
+}
+
+export function useRefreshProjects() {
+  const [settings, dispatch] = useSettings();
+  async function refresh() {
+    // TODO: Pagination
+    const url = 'https://firebase.googleapis.com/v1beta1/projects';
+    const projects = await Promise.all(
+      settings.users.map(async user => {
+        // Need to exchange refresh token for access token
+        const res = await ky(url, { searchParams: { access_token: user. } });
+        const body = res.json();
+        console.log(body);
+      })
+    );
+  }
+  return refresh;
 }

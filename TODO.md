@@ -12,6 +12,8 @@ link to real firebase for editing
 -- release --
 for projects, store added time for consistant sorting
 Warning: The following components suspended during a user-blocking update: SuspendedExpand, SuspendedValue
+remove accounts
+account avatars
 
 - maybe -
 hyperlinks between uids and stuff

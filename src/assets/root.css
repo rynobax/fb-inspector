@@ -17,16 +17,9 @@ button {
   border: none;
   outline: none;
   padding: 0px;
-  border: 1px solid #aaa;
-  color: #555;
-  fill: #777;
 }
 
 button:hover {
-  border: 1px solid #000;
-  color: #000;
-  fill: #000;
-  transition: 0.5s;
   cursor: pointer;
 }
 

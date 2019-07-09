@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import got from 'got';
+import ky from 'ky';
 
 import { Project, useProject } from './project';
 import { pathToString } from './path';
@@ -22,7 +22,7 @@ async function queryData(
   path: string
 ): Promise<FirebaseValue> {
   const { id, legacyToken } = project;
-  const data = await got(
+  const data = await ky(
     `https://${id}.firebaseio.com/${path}.json${params({
       shallow: true,
       auth: legacyToken,
@@ -30,7 +30,7 @@ async function queryData(
       //   'ya29.Gls_ByWYzDc6RNpqkwYjLdWECnmtlOBaFpmTlfkJowYaZt-cp3jx8B9M7i-TJiNXjFGp_YTXSaZ-JmYijcvmUn-5Hi3LdKRqPe4Cc9acglDCH6E0Cn4bzqm7PuZH',
     })}`
   );
-  return JSON.parse(data.body);
+  return data.json();
 }
 
 // const wait = (ms: number) => new Promise(r => setTimeout(() => r(), ms));

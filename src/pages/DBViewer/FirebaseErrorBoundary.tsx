@@ -1,17 +1,18 @@
 import React from 'react';
-import { HTTPError } from 'got';
+import { HTTPError } from 'ky';
 
 type LOL = typeof HTTPError;
 
 function getErrorMessage(error: Error) {
   if (error instanceof HTTPError) {
-    const { statusCode, statusMessage } = error;
-    switch (statusCode) {
-      case 401:
-        return `Got 401: ${statusMessage}.  Check the project settings.`;
-      default:
-        return `Unexpected error (${statusCode}): ${statusMessage}`;
-    }
+    return 'Ryan look at getErrorMessage';
+    // const { statusCode, statusMessage } = error;
+    // switch (statusCode) {
+    //   case 401:
+    //     return `Got 401: ${statusMessage}.  Check the project settings.`;
+    //   default:
+    //     return `Unexpected error (${statusCode}): ${statusMessage}`;
+    // }
   } else {
     throw Error();
   }

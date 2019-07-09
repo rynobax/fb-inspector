@@ -3,6 +3,7 @@ import React, { createContext, useContext } from 'react';
 import { useSettings } from './settings';
 
 export interface GoogleUser {
+  __id: string;
   email: string;
   refreshToken: string;
 }
