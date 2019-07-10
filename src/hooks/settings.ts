@@ -119,7 +119,6 @@ export const useSettings = (pollMs?: number) => {
   const stateStr = JSON.stringify(state);
   useEffect(() => {
     if(stateStr !== settingsJSON) {
-      console.log('setting');
       dispatch({ type: 'set', settings: JSON.parse(settingsJSON) })
     }
   }, [stateStr, settingsJSON])

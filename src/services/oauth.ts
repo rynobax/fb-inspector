@@ -13,7 +13,7 @@ interface OAuthResponse {
 }
 
 export async function getOAuthRefreshToken(access_token: string) {
-  const url = `${BASE_URL}/access_token/${encodeURIComponent(access_token)}`;
+  const url = `${BASE_URL}/access_token?code=${encodeURIComponent(access_token)}`;
   const res = await ky(url);
   const data = await res.json();
   if (data.error) {
@@ -25,7 +25,7 @@ export async function getOAuthRefreshToken(access_token: string) {
 
 const client_id =
   '561478918972-vkd6611959mpitiq8rvs6484dktic5e6.apps.googleusercontent.com';
-const redirect_uri = 'https://33d275d7.ngrok.io/oauth';
+const redirect_uri = 'https://3abcdd60.ngrok.io/oauth';
 // Required for refresh token
 const response_type = 'code';
 // Required for refresh token
@@ -62,7 +62,7 @@ export function useRefreshProjects() {
     const projects = await Promise.all(
       settings.users.map(async user => {
         // Need to exchange refresh token for access token
-        const res = await ky(url, { searchParams: { access_token: user. } });
+        const res = await ky(url, { searchParams: { access_token: '' } });
         const body = res.json();
         console.log(body);
       })
