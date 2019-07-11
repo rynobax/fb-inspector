@@ -48,7 +48,6 @@ type SettingsAction =
   | GoogleUserAdd;
 
 function getUpdatedState(state: Settings, action: SettingsAction) {
-  console.log(action);
   switch (action.type) {
     case 'project-add':
       return produce(state, s => {
@@ -100,17 +99,19 @@ function getIdFromProject(project: Omit<Project, '__id'>) {
 export const useSettings = (pollMs?: number) => {
   const [settingsJSON, setSettingsJSON] = useLocalStorage(
     'settings',
-    JSON.stringify(initalSettings),
-    pollMs
+    JSON.stringify(initalSettings)
   );
 
   const lsSettings: Settings = JSON.parse(settingsJSON);
 
-  const [state, dispatch] = useReducer((state: Settings, action: SettingsAction) => {
-    const updatedState = getUpdatedState(state, action);
-    setSettingsJSON(JSON.stringify(updatedState));
-    return updatedState;
-  }, lsSettings);
+  const [state, dispatch] = useReducer(
+    (state: Settings, action: SettingsAction) => {
+      const updatedState = getUpdatedState(state, action);
+      setSettingsJSON(JSON.stringify(updatedState));
+      return updatedState;
+    },
+    lsSettings
+  );
 
   // When adding a user, this will be updated from another window
   // So we need to manually set the reducer state
@@ -118,10 +119,10 @@ export const useSettings = (pollMs?: number) => {
   // let's see what happens :)
   const stateStr = JSON.stringify(state);
   useEffect(() => {
-    if(stateStr !== settingsJSON) {
-      dispatch({ type: 'set', settings: JSON.parse(settingsJSON) })
+    if (stateStr !== settingsJSON) {
+      dispatch({ type: 'set', settings: JSON.parse(settingsJSON) });
     }
-  }, [stateStr, settingsJSON])
+  }, [stateStr, settingsJSON]);
 
   return [state, dispatch] as [Settings, React.Dispatch<SettingsAction>];
 };

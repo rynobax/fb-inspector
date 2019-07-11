@@ -26,7 +26,7 @@ export async function getOAuthAccessToken(params: OAuthLookupParams) {
     return `${k}=${encodeURIComponent(v)}`;
   }, '');
   const url = `${BASE_URL}/access_token?${queryParams}`;
-  const res = await ky(url);
+  const res = await ky.post(url);
   const data: OAuthResponse = await res.json();
   if (isOauthError(data)) throw Error(JSON.stringify(data));
   return data;

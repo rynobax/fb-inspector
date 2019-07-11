@@ -3,6 +3,7 @@ log in with various user accounts
 show all projects from all accounts
 keep track of which user to use in the project
 use token to make requests
+does refreshing token work?  It wasn't working immediately
 
 - future -
 search within view
