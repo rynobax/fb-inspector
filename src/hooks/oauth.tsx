@@ -5,7 +5,8 @@ import { useSettings } from './settings';
 export interface GoogleUser {
   __id: string;
   email: string;
-  refreshToken: string;
+  access_token: string;
+  expires_at: number;
 }
 
 interface ProjectContextType {

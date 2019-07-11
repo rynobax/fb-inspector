@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from '@reach/router';
-import { getOAuthRefreshToken } from 'services/oauth';
+import { getOAuthAccessToken } from 'services/oauth';
 import { useSettings } from 'hooks/settings';
 
 type OAuthProps = RouteComponentProps;
@@ -31,11 +31,9 @@ const OAuthCatcher: React.FC<OAuthProps> = props => {
     const { access_token, code } = response;
     const token = access_token || code;
     if (!token) throw Error('No token!');
-    getOAuthRefreshToken(token)
-      .then(res => {
-        const middle = res.id_token.split('.')[1];
-        const email = JSON.parse(atob(middle)).email;
-        const user = { email, refreshToken: res.refresh_token };
+    getOAuthAccessToken({ code: token })
+      .then(({ email, access_token, expires_at }) => {
+        const user = { email, access_token, expires_at };
         dispatch({ type: 'googleuser-add', user });
         setLoading(false);
         setEmail(email);

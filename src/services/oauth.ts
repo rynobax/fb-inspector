@@ -3,24 +3,33 @@ import { useSettings } from 'hooks/settings';
 
 const BASE_URL = 'http://localhost:9001';
 
-interface OAuthResponse {
+interface OAuthSuccess {
+  email: string;
   access_token: string;
-  expires_in: number;
-  refresh_token: string;
-  scope: string;
-  token_type: string;
-  id_token: string;
+  expires_at: number;
 }
 
-export async function getOAuthRefreshToken(access_token: string) {
-  const url = `${BASE_URL}/access_token?code=${encodeURIComponent(access_token)}`;
+interface OAuthError {
+  error: string | {};
+}
+
+type OAuthResponse = OAuthSuccess | OAuthError;
+
+function isOauthError(res: OAuthResponse): res is OAuthError {
+  return !!(res as OAuthError).error;
+}
+
+type OAuthLookupParams = { email: string } | { code: string };
+
+export async function getOAuthAccessToken(params: OAuthLookupParams) {
+  const queryParams = Object.entries(params).reduce((_, [k, v]) => {
+    return `${k}=${encodeURIComponent(v)}`;
+  }, '');
+  const url = `${BASE_URL}/access_token?${queryParams}`;
   const res = await ky(url);
-  const data = await res.json();
-  if (data.error) {
-    if (data.error_description) throw Error(data.error_description);
-    else throw Error(JSON.stringify(data));
-  }
-  return data as OAuthResponse;
+  const data: OAuthResponse = await res.json();
+  if (isOauthError(data)) throw Error(JSON.stringify(data));
+  return data;
 }
 
 const client_id =

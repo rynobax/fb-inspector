@@ -7,7 +7,6 @@ import { useProject } from 'hooks/project';
 import ChevronDown from 'icons/ChevronDown';
 import User from 'icons/User';
 
-import AddProject from 'components/AddProject';
 import AccountsModal from 'components/AccountsModal';
 
 type OpenValues = 'closed' | 'editing' | 'adding';
