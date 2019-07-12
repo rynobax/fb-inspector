@@ -1,5 +1,4 @@
 import ky from 'ky';
-import { useSettings } from 'hooks/settings';
 
 const BASE_URL = 'http://localhost:9001';
 
@@ -63,19 +62,24 @@ export async function openOathRegister() {
   window.open(url, 'oath', 'height=600,width=600');
 }
 
-export function useRefreshProjects() {
-  const [settings, dispatch] = useSettings();
-  async function refresh() {
-    // TODO: Pagination
-    const url = 'https://firebase.googleapis.com/v1beta1/projects';
-    const projects = await Promise.all(
-      settings.users.map(async user => {
-        // Need to exchange refresh token for access token
-        const res = await ky(url, { searchParams: { access_token: '' } });
-        const body = res.json();
-        console.log(body);
-      })
-    );
-  }
-  return refresh;
+type ProjectsResponse = {
+  results: {
+    projectId: string;
+    projectNumber: string;
+    displayName: string;
+    name: string;
+    resources: {
+      hostingSite: string;
+      realtimeDatabaseInstance: string;
+    };
+  }[];
+};
+
+export async function getProjects(access_token: string) {
+  // https://firebase.googleapis.com/v1beta1/projects
+  // key: AIzaSyAa8yy0GdcGPHdtD083HiGGx_S0vMPScDM
+  const res: ProjectsResponse = await ky('https://firebase.googleapis.com/v1beta1/projects', {
+    headers: { authorization: `Bearer ${access_token}` },
+  }).json();
+  return res.results;
 }

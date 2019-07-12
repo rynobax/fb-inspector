@@ -5,20 +5,14 @@ import { useSettings } from './settings';
 import { resetData, resetOpen } from 'stores/firebase';
 
 export interface Project {
-  // Used internally to keep track
-  __id: string;
   id: string;
   name: string;
-  legacyToken: string;
 }
 
 interface ProjectContextType {
   project: Project | null;
   projects: Project[];
   selectProject: (id: string) => void;
-  addProject: (project: Omit<Project, '__id'>) => void;
-  updateProject: (project: Project) => void;
-  removeProject: (id: string) => void;
 }
 
 const ProjectContext = createContext<ProjectContextType>({
@@ -27,15 +21,6 @@ const ProjectContext = createContext<ProjectContextType>({
   selectProject: () => {
     throw Error('selectProject not initalized!');
   },
-  addProject: () => {
-    throw Error('addProject not initalized!');
-  },
-  updateProject: () => {
-    throw Error('updateProject not initalized!');
-  },
-  removeProject: () => {
-    throw Error('removeProject not initalized!');
-  },
 });
 
 interface ProjectProviderProps {
@@ -43,12 +28,12 @@ interface ProjectProviderProps {
 }
 
 export const ProjectProvider: React.FC<ProjectProviderProps> = props => {
-  const [settings, dispatch] = useSettings();
+  const [settings] = useSettings();
 
   const project =
-    settings.projects.find(p => p.__id === props.selectedProjectId) || null;
+    settings.projects.find(p => p.id === props.selectedProjectId) || null;
 
-  const projectId = project ? project.__id : null;
+  const projectId = project ? project.id : null;
   const firstUpdate = useRef(true);
   useEffect(() => {
     // Don't run on first render
@@ -70,10 +55,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = props => {
       value={{
         project,
         projects: settings.projects,
-        addProject: project => dispatch({ type: 'project-add', project }),
         selectProject: id => navigate(`/project/${id}`),
-        updateProject: project => dispatch({ type: 'project-update', project }),
-        removeProject: id => dispatch({ type: 'project-remove', id }),
       }}
     >
       {props.children}

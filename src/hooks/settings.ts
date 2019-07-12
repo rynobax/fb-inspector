@@ -3,7 +3,14 @@ import produce from 'immer';
 
 import useLocalStorage from './localstore';
 import { Project } from './project';
-import { GoogleUser } from './oauth';
+import { getOAuthAccessToken, getProjects } from 'services/google';
+
+interface GoogleUser {
+  id: string;
+  email: string;
+  access_token: string;
+  expires_at: number;
+}
 
 interface Settings {
   projects: Project[];
@@ -15,24 +22,19 @@ const initalSettings: Settings = {
   users: [],
 };
 
-interface ProjectAdd {
+interface ProjectSet {
   type: 'project-add';
-  project: Omit<Project, '__id'>;
-}
-
-interface ProjectRemove {
-  type: 'project-remove';
-  id: string;
-}
-
-interface ProjectUpdate {
-  type: 'project-update';
   project: Project;
 }
 
 interface GoogleUserAdd {
   type: 'googleuser-add';
-  user: Omit<GoogleUser, '__id'>;
+  user: Omit<GoogleUser, 'id'>;
+}
+
+interface GoogleUserUpdate {
+  type: 'googleuser-update';
+  user: Partial<GoogleUser> & Pick<GoogleUser, 'id'>;
 }
 
 interface Set {
@@ -40,63 +42,59 @@ interface Set {
   settings: Settings;
 }
 
-type SettingsAction =
-  | Set
-  | ProjectAdd
-  | ProjectRemove
-  | ProjectUpdate
-  | GoogleUserAdd;
+type SettingsAction = Set | ProjectSet | GoogleUserAdd | GoogleUserUpdate;
 
 function getUpdatedState(state: Settings, action: SettingsAction) {
   switch (action.type) {
     case 'project-add':
       return produce(state, s => {
-        s.projects.push({
-          ...action.project,
-          __id: getIdFromProject(action.project),
-        });
-      });
-    case 'project-remove':
-      return produce(state, s => {
-        s.projects = s.projects.filter(p => p.__id === action.id);
-      });
-    case 'project-update':
-      return produce(state, s => {
-        s.projects = s.projects.map(p =>
-          p.__id === action.project.__id
-            ? { ...action.project, __id: getIdFromProject(action.project) }
-            : p
-        );
+        const { project } = action;
+        const ndx = s.projects.findIndex(p => p.id === project.id);
+        if (ndx === -1) {
+          // It's new!
+          s.projects.push(project);
+        } else {
+          // Update it
+          s.projects[ndx] = project;
+        }
       });
     case 'googleuser-add':
       return produce(state, s => {
-        const __id = getIdFromGoogleUser(action.user);
+        const id = getIdFromGoogleUser(action.user);
         const user = {
           ...action.user,
-          __id,
+          id,
         };
-        if (s.users.find(e => e.__id === __id)) {
-          s.users = s.users.map(e => (e.__id === __id ? user : e));
+        if (s.users.find(e => e.id === id)) {
+          s.users = s.users.map(e => (e.id === id ? user : e));
         } else {
           s.users.push(user);
         }
       });
+    case 'googleuser-update':
+      return produce(state, s => {
+        s.users = s.users.map(u =>
+          u.id === action.user.id
+            ? {
+                ...u,
+                ...action.user,
+              }
+            : u
+        );
+      });
     case 'set':
+      // Used for when we update the settings from another tab
       return action.settings;
     default:
       throw Error(`Unimplemented action: ${(action as SettingsAction).type}`);
   }
 }
 
-function getIdFromGoogleUser(user: Omit<GoogleUser, '__id'>) {
+function getIdFromGoogleUser(user: Omit<GoogleUser, 'id'>) {
   return user.email.toLowerCase();
 }
 
-function getIdFromProject(project: Omit<Project, '__id'>) {
-  return project.name.toLowerCase();
-}
-
-export const useSettings = (pollMs?: number) => {
+export const useSettings = () => {
   const [settingsJSON, setSettingsJSON] = useLocalStorage(
     'settings',
     JSON.stringify(initalSettings)
@@ -104,7 +102,7 @@ export const useSettings = (pollMs?: number) => {
 
   const lsSettings: Settings = JSON.parse(settingsJSON);
 
-  const [state, dispatch] = useReducer(
+  const [rawState, dispatch] = useReducer(
     (state: Settings, action: SettingsAction) => {
       const updatedState = getUpdatedState(state, action);
       setSettingsJSON(JSON.stringify(updatedState));
@@ -117,12 +115,54 @@ export const useSettings = (pollMs?: number) => {
   // So we need to manually set the reducer state
   // It feels like this is inviting a race condition, but
   // let's see what happens :)
-  const stateStr = JSON.stringify(state);
+  const stateStr = JSON.stringify(rawState);
   useEffect(() => {
     if (stateStr !== settingsJSON) {
       dispatch({ type: 'set', settings: JSON.parse(settingsJSON) });
     }
   }, [stateStr, settingsJSON]);
 
-  return [state, dispatch] as [Settings, React.Dispatch<SettingsAction>];
+  const state = {
+    users: rawState.users.map(u => {
+      return {
+        id: u.id,
+        email: u.email,
+        getAccessToken: async () => {
+          const { access_token, expires_at, email, id } = u;
+          const expired = Date.now() > expires_at;
+          if (expired) {
+            // Refresh token if expired
+            const res = await getOAuthAccessToken({ email });
+            dispatch({ type: 'googleuser-update', user: { id, ...res } });
+            return res.access_token;
+          } else {
+            return access_token;
+          }
+        },
+      };
+    }),
+    projects: rawState.projects,
+  };
+
+  // Mb need to memo these
+  const actionCreators = {
+    refreshProjects: async () => {
+      await Promise.all(
+        state.users.map(async user => {
+          const token = await user.getAccessToken();
+          const projects = await getProjects(token);
+          projects.forEach(project =>
+            dispatch({
+              type: 'project-add',
+              project: { id: project.projectId, name: project.displayName },
+            })
+          );
+        })
+      );
+    },
+    addUser: (user: Omit<GoogleUser, 'id'>) =>
+      dispatch({ type: 'googleuser-add', user }),
+  };
+
+  return [state, actionCreators] as [typeof state, typeof actionCreators];
 };

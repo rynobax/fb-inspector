@@ -4,7 +4,7 @@ import styled from 'sc';
 
 import Add from 'icons/Add';
 
-import { openOathRegister } from 'services/oauth';
+import { openOathRegister } from 'services/google';
 import { useSettings } from 'hooks/settings';
 import Button from 'components/Button';
 import Refresh from 'icons/Refresh';
@@ -15,20 +15,20 @@ interface AccountsModalProps {
 }
 
 const AccountsModal: React.FC<AccountsModalProps> = props => {
-  const [settings] = useSettings(1000);
+  const [settings, { refreshProjects }] = useSettings();
   const accounts = settings.users;
   return (
     <AddDialog isOpen={props.open} onDismiss={props.onClose}>
       <HeaderLabel>Accounts</HeaderLabel>
       {accounts.length === 0 && <div>No accounts!</div>}
       {accounts.map(account => {
-        return <Account key={account.__id}>{account.email}</Account>;
+        return <Account key={account.id}>{account.email}</Account>;
       })}
       <StyledButton Icon={Add} onClick={openOathRegister}>
         Add Account
       </StyledButton>
       <HeaderLabel>Projects</HeaderLabel>
-      <StyledButton Icon={Refresh} onClick={openOathRegister}>
+      <StyledButton Icon={Refresh} onClick={refreshProjects}>
         Refresh Projects
       </StyledButton>
     </AddDialog>

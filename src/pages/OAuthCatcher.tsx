@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from '@reach/router';
-import { getOAuthAccessToken } from 'services/oauth';
+import { getOAuthAccessToken } from 'services/google';
 import { useSettings } from 'hooks/settings';
 
 type OAuthProps = RouteComponentProps;
@@ -9,7 +9,7 @@ const OAuthCatcher: React.FC<OAuthProps> = props => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [settings, dispatch] = useSettings();
+  const [settings, { addUser }] = useSettings();
 
   if (!props.location) throw Error('No location');
 
@@ -34,7 +34,7 @@ const OAuthCatcher: React.FC<OAuthProps> = props => {
     getOAuthAccessToken({ code: token })
       .then(({ email, access_token, expires_at }) => {
         const user = { email, access_token, expires_at };
-        dispatch({ type: 'googleuser-add', user });
+        addUser(user);
         setLoading(false);
         setEmail(email);
       })
@@ -42,7 +42,7 @@ const OAuthCatcher: React.FC<OAuthProps> = props => {
         setError(err);
         setLoading(false);
       });
-  }, [hash, search, dispatch]);
+  }, [hash, search, addUser]);
 
   if (loading) return <div>Loading</div>;
   if (error) throw error;

@@ -28,9 +28,9 @@ const Header: React.FC<HeaderProps> = props => {
           <MenuList className="slide-down">
             {projects.map(p => {
               const selectedMark =
-                project && project.__id === p.__id ? '> ' : '';
+                project && project.id === p.id ? '> ' : '';
               return (
-                <MenuItem key={p.id} onSelect={() => selectProject(p.__id)}>
+                <MenuItem key={p.id} onSelect={() => selectProject(p.id)}>
                   {selectedMark}{p.name}
                 </MenuItem>
               );

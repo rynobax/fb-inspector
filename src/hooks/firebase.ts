@@ -21,7 +21,9 @@ async function queryData(
   project: Project,
   path: string
 ): Promise<FirebaseValue> {
-  const { id, legacyToken } = project;
+  const { id } = project;
+  const legacyToken = 'REMOVE ME';
+  return Promise.resolve('REMOVE ME');
   const data = await ky(
     `https://${id}.firebaseio.com/${path}.json${params({
       shallow: true,
