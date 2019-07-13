@@ -1,7 +1,12 @@
-import { useReducer, useEffect, useState } from 'react';
+import React, {
+  Dispatch,
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+} from 'react';
 import produce from 'immer';
 
-import useLocalStorage from './localstore';
 import { Project } from './project';
 import { getOAuthAccessToken, getProjects } from 'services/google';
 
@@ -24,11 +29,6 @@ interface Settings {
   projects: Project[];
   users: GoogleUser[];
 }
-
-const initalSettings: Settings = {
-  projects: [],
-  users: [],
-};
 
 interface ProjectAdd {
   type: 'project-add';
@@ -111,14 +111,12 @@ function getIdFromGoogleUser(user: Omit<GoogleUser, 'id'>) {
   return user.email.toLowerCase();
 }
 
-export const useSettings = () => {
-  const [settingsJSON, setSettingsJSON] = useLocalStorage(
-    'settings',
-    JSON.stringify(initalSettings)
-  );
-
-  const state: Settings = JSON.parse(settingsJSON);
-
+// Nicer version of state for ui
+// Also nicer actions
+function getConsumerStuff(
+  state: Settings,
+  setSettingsJSON: React.Dispatch<string>
+) {
   function dispatch(action: SettingsAction) {
     const updatedState = getUpdatedState(state, action);
     setSettingsJSON(JSON.stringify(updatedState));
@@ -131,7 +129,6 @@ export const useSettings = () => {
       getAccessToken: async () => {
         const { access_token, expires_at, email, id } = u;
         const expired = Date.now() > expires_at;
-        console.log({ expired });
         if (expired) {
           // Refresh token if expired
           const res = await getOAuthAccessToken({ email });
@@ -144,7 +141,6 @@ export const useSettings = () => {
     };
   });
 
-  // Nicer version of state for ui
   const consumerState = {
     accounts,
     projects: state.projects,
@@ -156,6 +152,7 @@ export const useSettings = () => {
         consumerState.accounts.map(async account => {
           const token = await account.getAccessToken();
           const projects = await getProjects(token);
+          console.log({ projects });
           projects.forEach(project =>
             dispatch({
               type: 'project-add',
@@ -173,11 +170,83 @@ export const useSettings = () => {
       dispatch({ type: 'googleuser-add', user }),
     removeUser: (id: string) => dispatch({ type: 'googleuser-remove', id }),
   };
+  console.log({ consumerState });
+  return [consumerState, actionCreators] as [
+    typeof consumerState,
+    typeof actionCreators
+  ];
+}
 
-  // useEffect(() => {
-  //   console.log(accounts.length)
-  //   actionCreators.refreshProjects();
-  // }, [accounts.length]);
-
-  return [consumerState, actionCreators] as [typeof consumerState, typeof actionCreators];
+export const useSettings = () => {
+  const { settingsJSON, setSettingsJSON } = useLocalStorageSettings();
+  console.log({ settingsJSON });
+  const state: Settings = JSON.parse(settingsJSON);
+  return getConsumerStuff(state, setSettingsJSON);
 };
+
+/* Saving to localstorage */
+
+interface LocalStorageSettingsContextType {
+  setSettingsJSON: React.Dispatch<string>;
+  settingsJSON: string;
+}
+
+const LocalStorageSettingsContext = createContext<
+  LocalStorageSettingsContextType
+>({
+  settingsJSON: '',
+  setSettingsJSON: () => {
+    throw Error('LocalStorageSettingsContext setSettingsJSON not implemented');
+  },
+});
+
+function useLocalStorageSettings() {
+  return useContext(LocalStorageSettingsContext);
+}
+
+const initalSettings: Settings = {
+  projects: [],
+  users: [],
+};
+
+export const LocalStorageSettingsProvider: React.FC = props => {
+  // In order for this to update all instances, we need to export
+  // a common state via context
+  // Don't use it anywhere else but here :)
+  const [settingsJSON, setSettingsJSON] = useLocalStorage_dont_use(
+    'settings',
+    JSON.stringify(initalSettings)
+  );
+  return (
+    <LocalStorageSettingsContext.Provider
+      value={{ settingsJSON, setSettingsJSON }}
+    >
+      {props.children}
+    </LocalStorageSettingsContext.Provider>
+  );
+};
+
+function useLocalStorage_dont_use(
+  key: string,
+  initialValue: string = ''
+): [string, Dispatch<string>] {
+  const [value, setValue] = useState(
+    () => window.localStorage.getItem(key) || initialValue
+  );
+
+  useEffect(() => {
+    window.localStorage.setItem(key, value);
+  }, [key, value]);
+
+  useEffect(() => {
+    function onStorage() {
+      const newValue = window.localStorage.getItem(key) || initialValue;
+      if (value !== newValue) setValue(newValue);
+    }
+
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [initialValue, key, value]);
+
+  return [value, setValue];
+}
