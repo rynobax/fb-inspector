@@ -30,7 +30,7 @@ const initalSettings: Settings = {
   users: [],
 };
 
-interface ProjectSet {
+interface ProjectAdd {
   type: 'project-add';
   project: Project;
 }
@@ -50,14 +50,8 @@ interface GoogleUserUpdate {
   user: Partial<GoogleUser> & Pick<GoogleUser, 'id'>;
 }
 
-interface Set {
-  type: 'set';
-  settings: Settings;
-}
-
 type SettingsAction =
-  | Set
-  | ProjectSet
+  | ProjectAdd
   | GoogleUserAdd
   | GoogleUserUpdate
   | GoogleUserRemove;
@@ -108,9 +102,6 @@ function getUpdatedState(state: Settings, action: SettingsAction) {
         // Remove projects
         s.projects = s.projects.filter(p => p.ownerUserId !== deletedId);
       });
-    case 'set':
-      // Used for when we update the settings from another tab
-      return action.settings;
     default:
       throw Error(`Unimplemented action: ${(action as SettingsAction).type}`);
   }
@@ -126,32 +117,14 @@ export const useSettings = () => {
     JSON.stringify(initalSettings)
   );
 
-  const lsSettings: Settings = JSON.parse(settingsJSON);
+  const state: Settings = JSON.parse(settingsJSON);
 
-  const [rawState, dispatch] = useReducer(
-    (state: Settings, action: SettingsAction) => {
-      const updatedState = getUpdatedState(state, action);
-      setSettingsJSON(JSON.stringify(updatedState));
-      return updatedState;
-    },
-    lsSettings
-  );
+  function dispatch(action: SettingsAction) {
+    const updatedState = getUpdatedState(state, action);
+    setSettingsJSON(JSON.stringify(updatedState));
+  }
 
-  const [needToRefresh, setNeedToRefresh] = useState(false);
-
-  // When adding a user, this will be updated from another window
-  // So we need to manually set the reducer state
-  // It feels like this is inviting a race condition, but
-  // let's see what happens :)
-  const stateStr = JSON.stringify(rawState);
-  useEffect(() => {
-    if (stateStr !== settingsJSON) {
-      dispatch({ type: 'set', settings: JSON.parse(settingsJSON) });
-      setNeedToRefresh(true);
-    }
-  }, [stateStr, settingsJSON]);
-
-  const accounts: GoogleAccount[] = rawState.users.map(u => {
+  const accounts: GoogleAccount[] = state.users.map(u => {
     return {
       id: u.id,
       email: u.email,
@@ -171,15 +144,16 @@ export const useSettings = () => {
     };
   });
 
-  const state = {
+  // Nicer version of state for ui
+  const consumerState = {
     accounts,
-    projects: rawState.projects,
+    projects: state.projects,
   };
 
   const actionCreators = {
     refreshProjects: async () => {
       await Promise.all(
-        state.accounts.map(async account => {
+        consumerState.accounts.map(async account => {
           const token = await account.getAccessToken();
           const projects = await getProjects(token);
           projects.forEach(project =>
@@ -200,13 +174,10 @@ export const useSettings = () => {
     removeUser: (id: string) => dispatch({ type: 'googleuser-remove', id }),
   };
 
-  useEffect(() => {
-    if (needToRefresh) {
-      console.log({ needToRefresh })
-      console.log('would have refershed', state);
-      setNeedToRefresh(false);
-    }
-  }, [needToRefresh]);
+  // useEffect(() => {
+  //   console.log(accounts.length)
+  //   actionCreators.refreshProjects();
+  // }, [accounts.length]);
 
-  return [state, actionCreators] as [typeof state, typeof actionCreators];
+  return [consumerState, actionCreators] as [typeof consumerState, typeof actionCreators];
 };
