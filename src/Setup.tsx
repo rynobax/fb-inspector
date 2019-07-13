@@ -4,19 +4,17 @@ import { ThemeProvider } from 'styled-components';
 import Routing from 'pages/Routing';
 import TopLevelErrorBoundary from 'components/TopLevelErrorBoundary';
 import { theme } from 'sc';
-import { useSettings, LocalStorageSettingsProvider } from 'hooks/settings';
+import { useSettings } from 'hooks/settings';
 
 const Setup: React.FC = () => {
   return (
     <React.StrictMode>
       <ThemeProvider theme={theme}>
         <TopLevelErrorBoundary>
-          <LocalStorageSettingsProvider>
-            <Suspense fallback={<div>Fallback</div>}>
-              <Routing />
-            </Suspense>
-            <SettingsRefresher />
-          </LocalStorageSettingsProvider>
+          <Suspense fallback={<div>Fallback</div>}>
+            <Routing />
+          </Suspense>
+          <SettingsRefresher />
         </TopLevelErrorBoundary>
       </ThemeProvider>
     </React.StrictMode>

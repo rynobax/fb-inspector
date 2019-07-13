@@ -1,15 +1,13 @@
-import React, {
-  Dispatch,
-  useState,
-  useEffect,
-  createContext,
-  useContext,
-  useReducer,
-} from 'react';
+import React, { useEffect, useReducer } from 'react';
 import produce from 'immer';
 
 import { Project } from './project';
 import { getOAuthAccessToken, getProjects } from 'services/google';
+
+const initalSettings: Settings = {
+  projects: [],
+  users: [],
+};
 
 // How we store in localstorage
 interface GoogleUser {
@@ -29,6 +27,11 @@ export interface GoogleAccount {
 interface Settings {
   projects: Project[];
   users: GoogleUser[];
+}
+
+interface SettingsSet {
+  type: 'settings-set';
+  settings: Settings;
 }
 
 interface ProjectAdd {
@@ -52,6 +55,7 @@ interface GoogleUserUpdate {
 }
 
 type SettingsAction =
+  | SettingsSet
   | ProjectAdd
   | GoogleUserAdd
   | GoogleUserUpdate
@@ -103,6 +107,8 @@ function getUpdatedState(state: Settings, action: SettingsAction) {
         // Remove projects
         s.projects = s.projects.filter(p => p.ownerUserId !== deletedId);
       });
+    case 'settings-set':
+      return action.settings;
     default:
       throw Error(`Unimplemented action: ${(action as SettingsAction).type}`);
   }
@@ -173,82 +179,36 @@ function getConsumerStuff(
 }
 
 export const useSettings = () => {
-  const { settingsJSON, setSettingsJSON } = useLocalStorageSettings();
-  const jsonState: Settings = JSON.parse(settingsJSON);
   const [reducerState, dispatch] = useReducer(
     (state: Settings, action: SettingsAction) => {
       const updatedState = getUpdatedState(state, action);
-      setSettingsJSON(JSON.stringify(updatedState));
+      setLSSettings(updatedState);
       return updatedState;
     },
-    jsonState
+    getLSSettings()
   );
-  return getConsumerStuff(reducerState, dispatch);
-};
-
-/* Saving to localstorage */
-
-interface LocalStorageSettingsContextType {
-  setSettingsJSON: React.Dispatch<string>;
-  settingsJSON: string;
-}
-
-const LocalStorageSettingsContext = createContext<
-  LocalStorageSettingsContextType
->({
-  settingsJSON: '',
-  setSettingsJSON: () => {
-    throw Error('LocalStorageSettingsContext setSettingsJSON not implemented');
-  },
-});
-
-function useLocalStorageSettings() {
-  return useContext(LocalStorageSettingsContext);
-}
-
-const initalSettings: Settings = {
-  projects: [],
-  users: [],
-};
-
-export const LocalStorageSettingsProvider: React.FC = props => {
-  // In order for this to update all instances, we need to export
-  // a common state via context
-  // Don't use it anywhere else but here :)
-  const [settingsJSON, setSettingsJSON] = useLocalStorage_dont_use(
-    'settings',
-    JSON.stringify(initalSettings)
-  );
-  return (
-    <LocalStorageSettingsContext.Provider
-      value={{ settingsJSON, setSettingsJSON }}
-    >
-      {props.children}
-    </LocalStorageSettingsContext.Provider>
-  );
-};
-
-function useLocalStorage_dont_use(
-  key: string,
-  initialValue: string = ''
-): [string, Dispatch<string>] {
-  const [value, setValue] = useState(
-    () => window.localStorage.getItem(key) || initialValue
-  );
-
-  useEffect(() => {
-    window.localStorage.setItem(key, value);
-  }, [key, value]);
 
   useEffect(() => {
     function onStorage() {
-      const newValue = window.localStorage.getItem(key) || initialValue;
-      if (value !== newValue) setValue(newValue);
+      dispatch({ type: 'settings-set', settings: getLSSettings() });
     }
 
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
-  }, [initialValue, key, value]);
+  }, []);
 
-  return [value, setValue];
+  return getConsumerStuff(reducerState, dispatch);
+};
+
+/* Saving to localstorage */
+const SETTINGS_KEY = 'settings';
+
+function getLSSettings(): Settings {
+  return JSON.parse(
+    window.localStorage.getItem(SETTINGS_KEY) || JSON.stringify(initalSettings)
+  );
+}
+
+function setLSSettings(value: Settings) {
+  return window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(value));
 }
