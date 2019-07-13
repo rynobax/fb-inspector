@@ -1,4 +1,4 @@
-/** @license React v0.0.0-eb2ace128
+/** @license React v0.0.0-9f395904c
  * react.development.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -17,7 +17,7 @@
 
 // TODO: this is special because it gets imported during build.
 
-var ReactVersion = '16.8.6-canary-eb2ace128';
+var ReactVersion = '16.8.6-canary-9f395904c';
 
 // The Symbol used to tag the ReactElement-like types. If there is no native Symbol
 // nor polyfill, then a plain number is used for performance.
@@ -719,20 +719,18 @@ function setCurrentlyValidatingElement(element) {
 }
 
 /**
- * Used by act() to track whether you're outside an act() scope.
- * We use a renderer's flushPassiveEffects as the sigil value
- * so we can track identity of the renderer.
+ * Used by act() to track whether you're inside an act() scope.
  */
 
-var ReactCurrentActingRendererSigil = {
-  current: null
+var IsSomeRendererActing = {
+  current: false
 };
 
 var ReactSharedInternals = {
   ReactCurrentDispatcher: ReactCurrentDispatcher,
   ReactCurrentBatchConfig: ReactCurrentBatchConfig,
   ReactCurrentOwner: ReactCurrentOwner,
-  ReactCurrentActingRendererSigil: ReactCurrentActingRendererSigil,
+  IsSomeRendererActing: IsSomeRendererActing,
   // Used by renderers to avoid bundling object-assign twice in UMD bundles:
   assign: objectAssign
 };
@@ -2600,6 +2598,22 @@ var isPerformingWork = false;
 var isHostCallbackScheduled = false;
 var isHostTimeoutScheduled = false;
 
+function scheduler_flushTaskAtPriority_Immediate(callback, didTimeout) {
+  return callback(didTimeout);
+}
+function scheduler_flushTaskAtPriority_UserBlocking(callback, didTimeout) {
+  return callback(didTimeout);
+}
+function scheduler_flushTaskAtPriority_Normal(callback, didTimeout) {
+  return callback(didTimeout);
+}
+function scheduler_flushTaskAtPriority_Low(callback, didTimeout) {
+  return callback(didTimeout);
+}
+function scheduler_flushTaskAtPriority_Idle(callback, didTimeout) {
+  return callback(didTimeout);
+}
+
 function flushTask(task, currentTime) {
   // Remove the task from the list before calling the callback. That way the
   // list is in a consistent state even if the callback throws.
@@ -2627,7 +2641,25 @@ function flushTask(task, currentTime) {
   var continuationCallback;
   try {
     var didUserCallbackTimeout = task.expirationTime <= currentTime;
-    continuationCallback = callback(didUserCallbackTimeout);
+    // Add an extra function to the callstack. Profiling tools can use this
+    // to infer the priority of work that appears higher in the stack.
+    switch (currentPriorityLevel) {
+      case ImmediatePriority:
+        continuationCallback = scheduler_flushTaskAtPriority_Immediate(callback, didUserCallbackTimeout);
+        break;
+      case UserBlockingPriority:
+        continuationCallback = scheduler_flushTaskAtPriority_UserBlocking(callback, didUserCallbackTimeout);
+        break;
+      case NormalPriority:
+        continuationCallback = scheduler_flushTaskAtPriority_Normal(callback, didUserCallbackTimeout);
+        break;
+      case LowPriority:
+        continuationCallback = scheduler_flushTaskAtPriority_Low(callback, didUserCallbackTimeout);
+        break;
+      case IdlePriority:
+        continuationCallback = scheduler_flushTaskAtPriority_Idle(callback, didUserCallbackTimeout);
+        break;
+    }
   } catch (error) {
     throw error;
   } finally {
@@ -3424,8 +3456,7 @@ var SchedulerTracing = Object.freeze({
 var ReactSharedInternals$2 = {
   ReactCurrentDispatcher: ReactCurrentDispatcher,
   ReactCurrentOwner: ReactCurrentOwner,
-  // used by act()
-  ReactShouldWarnActingUpdates: { current: false },
+  IsSomeRendererActing: IsSomeRendererActing,
   // Used by renderers to avoid bundling object-assign twice in UMD bundles:
   assign: objectAssign
 };
@@ -3449,44 +3480,6 @@ objectAssign(ReactSharedInternals$2, {
   Scheduler: Scheduler,
   SchedulerTracing: SchedulerTracing
 });
-
-function noop() {}
-
-var error = noop;
-var warn = noop;
-{
-  var ReactDebugCurrentFrame$2 = ReactSharedInternals.ReactDebugCurrentFrame;
-
-  error = function () {
-    var stack = ReactDebugCurrentFrame$2.getStackAddendum();
-    if (stack !== '') {
-      var length = arguments.length;
-      var args = new Array(length + 1);
-      for (var i = 0; i < length; i++) {
-        args[i] = arguments[i];
-      }
-      args[length] = stack;
-      console.error.apply(console, args);
-    } else {
-      console.error.apply(console, arguments);
-    }
-  };
-
-  warn = function () {
-    var stack = ReactDebugCurrentFrame$2.getStackAddendum();
-    if (stack !== '') {
-      var length = arguments.length;
-      var args = new Array(length + 1);
-      for (var i = 0; i < length; i++) {
-        args[i] = arguments[i];
-      }
-      args[length] = stack;
-      console.warn.apply(console, args);
-    } else {
-      console.warn.apply(console, arguments);
-    }
-  };
-}
 
 var hasBadMapPolyfill = void 0;
 
@@ -3541,9 +3534,6 @@ var React = {
   forwardRef: forwardRef,
   lazy: lazy,
   memo: memo,
-
-  error: error,
-  warn: warn,
 
   useCallback: useCallback,
   useContext: useContext,
