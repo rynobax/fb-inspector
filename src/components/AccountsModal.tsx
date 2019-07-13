@@ -16,7 +16,7 @@ interface AccountsModalProps {
 
 const AccountsModal: React.FC<AccountsModalProps> = props => {
   const [settings, { refreshProjects }] = useSettings();
-  const accounts = settings.users;
+  const { accounts, projects } = settings;
   return (
     <AddDialog isOpen={props.open} onDismiss={props.onClose}>
       <HeaderLabel>Accounts</HeaderLabel>
@@ -28,6 +28,10 @@ const AccountsModal: React.FC<AccountsModalProps> = props => {
         Add Account
       </StyledButton>
       <HeaderLabel>Projects</HeaderLabel>
+      {projects.length === 0 && <div>No projects!</div>}
+      {projects.map(project => {
+        return <Account key={project.id}>{project.name}</Account>;
+      })}
       <StyledButton Icon={Refresh} onClick={refreshProjects}>
         Refresh Projects
       </StyledButton>

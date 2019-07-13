@@ -5,11 +5,19 @@ import useLocalStorage from './localstore';
 import { Project } from './project';
 import { getOAuthAccessToken, getProjects } from 'services/google';
 
+// How we store in localstorage
 interface GoogleUser {
   id: string;
   email: string;
   access_token: string;
   expires_at: number;
+}
+
+// What the UI wants
+export interface GoogleAccount {
+  id: string;
+  email: string;
+  getAccessToken: () => Promise<string>;
 }
 
 interface Settings {
@@ -122,25 +130,27 @@ export const useSettings = () => {
     }
   }, [stateStr, settingsJSON]);
 
+  const accounts: GoogleAccount[] = rawState.users.map(u => {
+    return {
+      id: u.id,
+      email: u.email,
+      getAccessToken: async () => {
+        const { access_token, expires_at, email, id } = u;
+        const expired = Date.now() > expires_at;
+        if (expired) {
+          // Refresh token if expired
+          const res = await getOAuthAccessToken({ email });
+          dispatch({ type: 'googleuser-update', user: { id, ...res } });
+          return res.access_token;
+        } else {
+          return access_token;
+        }
+      },
+    };
+  });
+
   const state = {
-    users: rawState.users.map(u => {
-      return {
-        id: u.id,
-        email: u.email,
-        getAccessToken: async () => {
-          const { access_token, expires_at, email, id } = u;
-          const expired = Date.now() > expires_at;
-          if (expired) {
-            // Refresh token if expired
-            const res = await getOAuthAccessToken({ email });
-            dispatch({ type: 'googleuser-update', user: { id, ...res } });
-            return res.access_token;
-          } else {
-            return access_token;
-          }
-        },
-      };
-    }),
+    accounts,
     projects: rawState.projects,
   };
 
@@ -148,13 +158,17 @@ export const useSettings = () => {
   const actionCreators = {
     refreshProjects: async () => {
       await Promise.all(
-        state.users.map(async user => {
-          const token = await user.getAccessToken();
+        state.accounts.map(async account => {
+          const token = await account.getAccessToken();
           const projects = await getProjects(token);
           projects.forEach(project =>
             dispatch({
               type: 'project-add',
-              project: { id: project.projectId, name: project.displayName },
+              project: {
+                id: project.projectId,
+                name: project.displayName,
+                ownerUserId: account.id,
+              },
             })
           );
         })

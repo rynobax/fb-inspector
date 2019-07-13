@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import ky from 'ky';
 
-import { Project, useProject } from './project';
+import { useProject } from './project';
 import { pathToString } from './path';
 import { dataStore, FirebaseValue, Status } from 'stores/firebase';
+import { useSettings, GoogleAccount } from './settings';
 
 function params(obj: { [k: string]: string | boolean }) {
   let str = '';
@@ -17,19 +18,22 @@ function params(obj: { [k: string]: string | boolean }) {
   return str;
 }
 
-async function queryData(
-  project: Project,
-  path: string
-): Promise<FirebaseValue> {
-  const { id } = project;
-  const legacyToken = 'REMOVE ME';
-  return Promise.resolve('REMOVE ME');
+interface RequestParams {
+  projectId: string;
+  account: GoogleAccount;
+  pathStr: string;
+}
+
+async function queryData({
+  account,
+  pathStr,
+  projectId,
+}: RequestParams): Promise<FirebaseValue> {
+  const access_token = await account.getAccessToken();
   const data = await ky(
-    `https://${id}.firebaseio.com/${path}.json${params({
+    `https://${projectId}.firebaseio.com/${pathStr}.json${params({
       shallow: true,
-      auth: legacyToken,
-      // access_token:
-      //   'ya29.Gls_ByWYzDc6RNpqkwYjLdWECnmtlOBaFpmTlfkJowYaZt-cp3jx8B9M7i-TJiNXjFGp_YTXSaZ-JmYijcvmUn-5Hi3LdKRqPe4Cc9acglDCH6E0Cn4bzqm7PuZH',
+      access_token,
     })}`
   );
   return data.json();
@@ -37,13 +41,18 @@ async function queryData(
 
 // const wait = (ms: number) => new Promise(r => setTimeout(() => r(), ms));
 
-function initiateRequest(project: Project, pathStr: string) {
+function initiateRequest({ account, pathStr, projectId }: RequestParams) {
   const val = dataStore.get(pathStr);
   if (!val) {
     // Haven't cached, kick off request
     const prom = new Promise<void>(async (resolve, reject) => {
       try {
-        const value = await queryData(project, pathStr);
+        const value = await queryData({
+          account,
+          projectId,
+          pathStr,
+        });
+        // Test SuspenseList stuff
         // if (pathStr.startsWith('/its/nested/')) {
         //   await wait(Math.random() * 1000 * 5);
         // }
@@ -75,15 +84,28 @@ function initiateRequest(project: Project, pathStr: string) {
   }
 }
 
-export const useFirebase = (path: string[]): FirebaseValue => {
+const useInfoForQuery = () => {
   const { project } = useProject();
+  const [settings] = useSettings();
   if (!project) throw Error('Trying to use firebase with no project selected!');
+  const account = settings.accounts.find(u => u.id === project.ownerUserId);
+  if (!account)
+    throw Error('Trying to use firebase with no user for this project!');
+  return { account, project };
+};
+
+export const useFirebase = (path: string[]): FirebaseValue => {
+  const { account, project } = useInfoForQuery();
 
   const pathStr = pathToString(path);
   const val = dataStore.get(pathStr);
   if (!val) {
     // Haven't cached, kick off request
-    const prom = initiateRequest(project, pathStr);
+    const prom = initiateRequest({
+      account,
+      pathStr,
+      projectId: project.id,
+    });
     throw prom;
   } else {
     switch (val.status) {
@@ -101,10 +123,13 @@ export const useFirebase = (path: string[]): FirebaseValue => {
 };
 
 export const usePrimeFirebase = (path: string[]) => {
-  const { project } = useProject();
-  if (!project) throw Error('Trying to use firebase with no project selected!');
+  const { account, project } = useInfoForQuery();
   const pathStr = pathToString(path);
   useEffect(() => {
-    initiateRequest(project, pathStr);
-  }, [project, pathStr]);
+    initiateRequest({
+      account,
+      pathStr,
+      projectId: project.id,
+    });
+  }, [project, pathStr, account]);
 };

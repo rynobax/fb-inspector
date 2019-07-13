@@ -9,7 +9,7 @@ const OAuthCatcher: React.FC<OAuthProps> = props => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [settings, { addUser }] = useSettings();
+  const [settings, { addUser, refreshProjects }] = useSettings();
 
   if (!props.location) throw Error('No location');
 
@@ -35,6 +35,7 @@ const OAuthCatcher: React.FC<OAuthProps> = props => {
       .then(({ email, access_token, expires_at }) => {
         const user = { email, access_token, expires_at };
         addUser(user);
+        setTimeout(() => refreshProjects(), 400);
         setLoading(false);
         setEmail(email);
       })
@@ -42,13 +43,13 @@ const OAuthCatcher: React.FC<OAuthProps> = props => {
         setError(err);
         setLoading(false);
       });
-  }, [hash, search, addUser]);
+  }, [hash, search, addUser, refreshProjects]);
 
   if (loading) return <div>Loading</div>;
   if (error) throw error;
 
   const settingsReducerProcessing =
-    !email || !settings.users.find(e => e.email === email);
+    !email || !settings.accounts.find(e => e.email === email);
 
   if (settingsReducerProcessing) return <div>Loading</div>;
 
