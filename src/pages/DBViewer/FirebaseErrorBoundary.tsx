@@ -4,7 +4,6 @@ import { HTTPError } from 'ky';
 async function getErrorMessage(error: Error) {
   if (error instanceof HTTPError) {
     const text = await error.response.clone().json();
-    console.log(text);
     return JSON.stringify(text, null, 2);
   } else {
     throw Error();

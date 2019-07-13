@@ -29,7 +29,7 @@ interface ProjectProviderProps {
 }
 
 export const ProjectProvider: React.FC<ProjectProviderProps> = props => {
-  const [settings] = useSettings();
+  const { settings } = useSettings();
 
   const project =
     settings.projects.find(p => p.id === props.selectedProjectId) || null;

@@ -86,7 +86,7 @@ function initiateRequest({ account, pathStr, projectId }: RequestParams) {
 
 const useInfoForQuery = () => {
   const { project } = useProject();
-  const [settings] = useSettings();
+  const { settings } = useSettings();
   if (!project) throw Error('Trying to use firebase with no project selected!');
   const account = settings.accounts.find(u => u.id === project.ownerUserId);
   if (!account)

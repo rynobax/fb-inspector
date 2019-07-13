@@ -4,17 +4,19 @@ import { ThemeProvider } from 'styled-components';
 import Routing from 'pages/Routing';
 import TopLevelErrorBoundary from 'components/TopLevelErrorBoundary';
 import { theme } from 'sc';
-import { useSettings } from 'hooks/settings';
+import { useSettings, SettingsContextProvider } from 'hooks/settings';
 
 const Setup: React.FC = () => {
   return (
     <React.StrictMode>
       <ThemeProvider theme={theme}>
         <TopLevelErrorBoundary>
-          <Suspense fallback={<div>Fallback</div>}>
-            <Routing />
-          </Suspense>
-          <SettingsRefresher />
+          <SettingsContextProvider>
+            <Suspense fallback={<div>Fallback</div>}>
+              <Routing />
+            </Suspense>
+            <SettingsRefresher />
+          </SettingsContextProvider>
         </TopLevelErrorBoundary>
       </ThemeProvider>
     </React.StrictMode>
@@ -22,7 +24,7 @@ const Setup: React.FC = () => {
 };
 
 const SettingsRefresher: React.FC = () => {
-  const [settings, actions] = useSettings();
+  const { settings, actions } = useSettings();
   const isFirstRun = useRef(true);
 
   const accountCount = settings.accounts.length;

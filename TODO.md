@@ -1,5 +1,4 @@
 - now -
-allow removing user accounts
 requesting too many times initially
 allow show/hide projects
 visually seperate projects with different accounts

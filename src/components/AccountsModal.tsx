@@ -16,7 +16,7 @@ interface AccountsModalProps {
 }
 
 const AccountsModal: React.FC<AccountsModalProps> = props => {
-  const [settings, actions] = useSettings();
+  const { settings, actions } = useSettings();
   const { accounts, projects } = settings;
   return (
     <AddDialog isOpen={props.open} onDismiss={props.onClose}>

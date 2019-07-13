@@ -14,7 +14,7 @@ const PathContext = createContext<PathContextType>({
   path: [],
   pathStr: '/',
   setPath: () => {
-    throw Error('updatePath not initalized!');
+    throw Error('PathContext updatePath not initalized!');
   },
 });
 

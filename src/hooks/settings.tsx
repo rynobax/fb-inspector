@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, createContext, useContext } from 'react';
 import produce from 'immer';
 
 import { Project } from './project';
@@ -118,6 +118,19 @@ function getIdFromGoogleUser(user: Omit<GoogleUser, 'id'>) {
   return user.email.toLowerCase();
 }
 
+interface ConsumerSettings {
+  accounts: GoogleAccount[];
+  projects: Project[];
+}
+
+interface ActionCreators {
+  refreshProjects: () => Promise<void>;
+  addUser: (
+    user: Pick<GoogleUser, 'email' | 'access_token' | 'expires_at'>
+  ) => void;
+  removeUser: (id: string) => void;
+}
+
 // Nicer version of state for ui
 // Also nicer actions
 function getConsumerStuff(
@@ -143,18 +156,17 @@ function getConsumerStuff(
     };
   });
 
-  const consumerState = {
+  const consumerState: ConsumerSettings = {
     accounts,
     projects: state.projects,
   };
 
-  const actionCreators = {
+  const actionCreators: ActionCreators = {
     refreshProjects: async () => {
       await Promise.all(
         consumerState.accounts.map(async account => {
           const token = await account.getAccessToken();
           const projects = await getProjects(token);
-          console.log({ projects });
           projects.forEach(project =>
             dispatch({
               type: 'project-add',
@@ -168,17 +180,25 @@ function getConsumerStuff(
         })
       );
     },
-    addUser: (user: Omit<GoogleUser, 'id'>) =>
-      dispatch({ type: 'googleuser-add', user }),
-    removeUser: (id: string) => dispatch({ type: 'googleuser-remove', id }),
+    addUser: user => dispatch({ type: 'googleuser-add', user }),
+    removeUser: id => dispatch({ type: 'googleuser-remove', id }),
   };
-  return [consumerState, actionCreators] as [
-    typeof consumerState,
-    typeof actionCreators
-  ];
+  return [consumerState, actionCreators] as [ConsumerSettings, ActionCreators];
 }
 
-export const useSettings = () => {
+interface SettingsContextType {
+  settings: ConsumerSettings;
+  actions: ActionCreators;
+}
+
+const SettingsContext = createContext<SettingsContextType>({
+  settings: {} as any,
+  actions: {} as any,
+});
+
+export const useSettings = () => useContext(SettingsContext);
+
+export const SettingsContextProvider: React.FC = props => {
   const [reducerState, dispatch] = useReducer(
     (state: Settings, action: SettingsAction) => {
       const updatedState = getUpdatedState(state, action);
@@ -197,10 +217,14 @@ export const useSettings = () => {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  return getConsumerStuff(reducerState, dispatch);
+  const [settings, actions] = getConsumerStuff(reducerState, dispatch);
+  return (
+    <SettingsContext.Provider value={{ settings, actions }}>
+      {props.children}
+    </SettingsContext.Provider>
+  );
 };
 
-/* Saving to localstorage */
 const SETTINGS_KEY = 'settings';
 
 function getLSSettings(): Settings {
