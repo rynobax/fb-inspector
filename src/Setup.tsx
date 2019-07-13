@@ -27,15 +27,14 @@ const SettingsRefresher: React.FC = () => {
   const [settings, actions] = useSettings();
   const isFirstRun = useRef(true);
 
-  console.log('refresher', settings);
   const accountCount = settings.accounts.length;
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
       return;
     }
-    console.log('would refresh');
     actions.refreshProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountCount]);
   return null;
 };

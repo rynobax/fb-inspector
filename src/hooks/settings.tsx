@@ -4,6 +4,7 @@ import React, {
   useEffect,
   createContext,
   useContext,
+  useReducer,
 } from 'react';
 import produce from 'immer';
 
@@ -115,13 +116,8 @@ function getIdFromGoogleUser(user: Omit<GoogleUser, 'id'>) {
 // Also nicer actions
 function getConsumerStuff(
   state: Settings,
-  setSettingsJSON: React.Dispatch<string>
+  dispatch: React.Dispatch<SettingsAction>
 ) {
-  function dispatch(action: SettingsAction) {
-    const updatedState = getUpdatedState(state, action);
-    setSettingsJSON(JSON.stringify(updatedState));
-  }
-
   const accounts: GoogleAccount[] = state.users.map(u => {
     return {
       id: u.id,
@@ -170,7 +166,6 @@ function getConsumerStuff(
       dispatch({ type: 'googleuser-add', user }),
     removeUser: (id: string) => dispatch({ type: 'googleuser-remove', id }),
   };
-  console.log({ consumerState });
   return [consumerState, actionCreators] as [
     typeof consumerState,
     typeof actionCreators
@@ -179,9 +174,16 @@ function getConsumerStuff(
 
 export const useSettings = () => {
   const { settingsJSON, setSettingsJSON } = useLocalStorageSettings();
-  console.log({ settingsJSON });
-  const state: Settings = JSON.parse(settingsJSON);
-  return getConsumerStuff(state, setSettingsJSON);
+  const jsonState: Settings = JSON.parse(settingsJSON);
+  const [reducerState, dispatch] = useReducer(
+    (state: Settings, action: SettingsAction) => {
+      const updatedState = getUpdatedState(state, action);
+      setSettingsJSON(JSON.stringify(updatedState));
+      return updatedState;
+    },
+    jsonState
+  );
+  return getConsumerStuff(reducerState, dispatch);
 };
 
 /* Saving to localstorage */
