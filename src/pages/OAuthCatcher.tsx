@@ -35,7 +35,6 @@ const OAuthCatcher: React.FC<OAuthProps> = props => {
       .then(({ email, access_token, expires_at }) => {
         const user = { email, access_token, expires_at };
         addUser(user);
-        setTimeout(() => refreshProjects(), 400);
         setLoading(false);
         setEmail(email);
       })

@@ -1,9 +1,8 @@
 - now -
+allow removing user accounts
 requesting too many times initially
-log in with various user accounts
-show all projects from all accounts
-keep track of which user to use in the project
-use token to make requests
+allow show/hide projects
+visually seperate projects with different accounts
 does refreshing token work?  It wasn't working immediately
 
 - future -
@@ -16,6 +15,7 @@ for projects, store added time for consistant sorting
 Warning: The following components suspended during a user-blocking update: SuspendedExpand, SuspendedValue
 remove accounts
 account avatars
+delete users from server as well as client?
 
 - maybe -
 hyperlinks between uids and stuff

@@ -1,4 +1,4 @@
-import { useReducer, useEffect } from 'react';
+import { useReducer, useEffect, useState } from 'react';
 import produce from 'immer';
 
 import useLocalStorage from './localstore';
@@ -40,6 +40,11 @@ interface GoogleUserAdd {
   user: Omit<GoogleUser, 'id'>;
 }
 
+interface GoogleUserRemove {
+  type: 'googleuser-remove';
+  id: string;
+}
+
 interface GoogleUserUpdate {
   type: 'googleuser-update';
   user: Partial<GoogleUser> & Pick<GoogleUser, 'id'>;
@@ -50,7 +55,12 @@ interface Set {
   settings: Settings;
 }
 
-type SettingsAction = Set | ProjectSet | GoogleUserAdd | GoogleUserUpdate;
+type SettingsAction =
+  | Set
+  | ProjectSet
+  | GoogleUserAdd
+  | GoogleUserUpdate
+  | GoogleUserRemove;
 
 function getUpdatedState(state: Settings, action: SettingsAction) {
   switch (action.type) {
@@ -90,6 +100,14 @@ function getUpdatedState(state: Settings, action: SettingsAction) {
             : u
         );
       });
+    case 'googleuser-remove':
+      const deletedId = action.id;
+      return produce(state, s => {
+        // Remove user
+        s.users = s.users.filter(u => u.id !== deletedId);
+        // Remove projects
+        s.projects = s.projects.filter(p => p.ownerUserId !== deletedId);
+      });
     case 'set':
       // Used for when we update the settings from another tab
       return action.settings;
@@ -119,6 +137,8 @@ export const useSettings = () => {
     lsSettings
   );
 
+  const [needToRefresh, setNeedToRefresh] = useState(false);
+
   // When adding a user, this will be updated from another window
   // So we need to manually set the reducer state
   // It feels like this is inviting a race condition, but
@@ -127,6 +147,7 @@ export const useSettings = () => {
   useEffect(() => {
     if (stateStr !== settingsJSON) {
       dispatch({ type: 'set', settings: JSON.parse(settingsJSON) });
+      setNeedToRefresh(true);
     }
   }, [stateStr, settingsJSON]);
 
@@ -137,6 +158,7 @@ export const useSettings = () => {
       getAccessToken: async () => {
         const { access_token, expires_at, email, id } = u;
         const expired = Date.now() > expires_at;
+        console.log({ expired });
         if (expired) {
           // Refresh token if expired
           const res = await getOAuthAccessToken({ email });
@@ -154,7 +176,6 @@ export const useSettings = () => {
     projects: rawState.projects,
   };
 
-  // Mb need to memo these
   const actionCreators = {
     refreshProjects: async () => {
       await Promise.all(
@@ -176,7 +197,16 @@ export const useSettings = () => {
     },
     addUser: (user: Omit<GoogleUser, 'id'>) =>
       dispatch({ type: 'googleuser-add', user }),
+    removeUser: (id: string) => dispatch({ type: 'googleuser-remove', id }),
   };
+
+  useEffect(() => {
+    if (needToRefresh) {
+      console.log({ needToRefresh })
+      console.log('would have refershed', state);
+      setNeedToRefresh(false);
+    }
+  }, [needToRefresh]);
 
   return [state, actionCreators] as [typeof state, typeof actionCreators];
 };

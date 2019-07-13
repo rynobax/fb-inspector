@@ -1,18 +1,11 @@
 import React from 'react';
 import { HTTPError } from 'ky';
 
-type LOL = typeof HTTPError;
-
-function getErrorMessage(error: Error) {
+async function getErrorMessage(error: Error) {
   if (error instanceof HTTPError) {
-    return 'Ryan look at getErrorMessage';
-    // const { statusCode, statusMessage } = error;
-    // switch (statusCode) {
-    //   case 401:
-    //     return `Got 401: ${statusMessage}.  Check the project settings.`;
-    //   default:
-    //     return `Unexpected error (${statusCode}): ${statusMessage}`;
-    // }
+    const text = await error.response.clone().json();
+    console.log(text);
+    return JSON.stringify(text, null, 2);
   } else {
     throw Error();
   }
@@ -30,8 +23,8 @@ class FirebaseErrorBoundary extends React.Component<Props, State> {
   componentDidCatch(error: Error, info: any) {
     // You can also log the error to an error reporting service
     if (error instanceof HTTPError) {
-      const errorMsg = getErrorMessage(error);
-      this.setState({ errorMsg });
+      this.setState({ errorMsg: 'loading error' });
+      getErrorMessage(error).then(msg => this.setState({ errorMsg: msg }));
     } else {
       console.log('Got non http error, rethrowing');
       throw error;
@@ -41,7 +34,7 @@ class FirebaseErrorBoundary extends React.Component<Props, State> {
   render() {
     const { errorMsg } = this.state;
     if (errorMsg) {
-      return <div>{errorMsg}</div>;
+      return <pre>{errorMsg}</pre>;
     }
 
     return this.props.children;

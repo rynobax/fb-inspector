@@ -8,6 +8,7 @@ import { openOathRegister } from 'services/google';
 import { useSettings } from 'hooks/settings';
 import Button from 'components/Button';
 import Refresh from 'icons/Refresh';
+import Remove from 'icons/Close';
 
 interface AccountsModalProps {
   open: boolean;
@@ -15,14 +16,21 @@ interface AccountsModalProps {
 }
 
 const AccountsModal: React.FC<AccountsModalProps> = props => {
-  const [settings, { refreshProjects }] = useSettings();
+  const [settings, actions] = useSettings();
   const { accounts, projects } = settings;
   return (
     <AddDialog isOpen={props.open} onDismiss={props.onClose}>
       <HeaderLabel>Accounts</HeaderLabel>
       {accounts.length === 0 && <div>No accounts!</div>}
       {accounts.map(account => {
-        return <Account key={account.id}>{account.email}</Account>;
+        return (
+          <Row key={account.id}>
+            <RemoveButton onClick={() => actions.removeUser(account.id)}>
+              <Remove size={24} />
+            </RemoveButton>
+            <RowText>{account.email}</RowText>
+          </Row>
+        );
       })}
       <StyledButton Icon={Add} onClick={openOathRegister}>
         Add Account
@@ -30,9 +38,9 @@ const AccountsModal: React.FC<AccountsModalProps> = props => {
       <HeaderLabel>Projects</HeaderLabel>
       {projects.length === 0 && <div>No projects!</div>}
       {projects.map(project => {
-        return <Account key={project.id}>{project.name}</Account>;
+        return <Row key={project.id}>{project.name}</Row>;
       })}
-      <StyledButton Icon={Refresh} onClick={refreshProjects}>
+      <StyledButton Icon={Refresh} onClick={actions.refreshProjects}>
         Refresh Projects
       </StyledButton>
     </AddDialog>
@@ -53,8 +61,23 @@ const StyledButton = styled(Button)`
   margin-bottom: 16px;
 `;
 
-const Account = styled.div`
+const Row = styled.div`
   margin-bottom: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const RemoveButton = styled.button`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 8px;
+`;
+
+const RowText = styled.div`
+  /* Align text with button */
+  margin-bottom: 2px;
 `;
 
 export default AccountsModal;
