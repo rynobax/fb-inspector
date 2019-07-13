@@ -1,3 +1,3 @@
 # fb-inspector
 
-fb-inspector-test
+fb-inspector-test client
