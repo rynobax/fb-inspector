@@ -1,5 +1,6 @@
 import Datastore from 'nedb';
 import * as google from './google';
+import { MissingEmailError } from './errors';
 
 const db = new Datastore<Doc>({
   filename: './datastore/data.nedb',
@@ -13,22 +14,45 @@ interface Doc {
   expires_at: number;
 }
 
-const upsert = (updateDoc: Partial<Doc> & { email: string }) =>
-  new Promise<Doc>((resolve, reject) => {
-    const __id = updateDoc.email;
-    const newDoc = { __id, ...updateDoc };
-    db.update({ __id }, newDoc, { upsert: true }, err => {
+function upsert(doc: Doc) {
+  return new Promise<Doc>((resolve, reject) => {
+    getDoc({ email: doc.email }).then(oldDoc => {
+      if (!oldDoc) {
+        db.insert({ __id: doc.email, ...doc }, err => {
+          if (err) reject(err);
+          else resolve(doc);
+        });
+      } else {
+        db.update({ email: doc.email }, doc, {}, err => {
+          if (err) reject(err);
+          else resolve(doc);
+        });
+      }
+    });
+  });
+}
+
+interface UpdateAccessTokenParams {
+  email: string;
+  access_token: string;
+}
+
+function updateAccessToken({ email, access_token }: UpdateAccessTokenParams) {
+  return new Promise<Doc>((resolve, reject) => {
+    db.update({ email }, { access_token }, {}, err => {
       if (err) reject(err);
       else {
-        getDoc({ email: updateDoc.email })
-          .then(updatedDoc => {
-            if (!updatedDoc) throw Error('Could not find updated doc');
-            resolve(updatedDoc);
+        getDoc({ email })
+          .then(doc => {
+            if (!doc)
+              throw Error('Could not find doc after updating access token');
+            resolve(doc);
           })
           .catch(reject);
       }
     });
   });
+}
 
 interface GetDocParams {
   email: string;
@@ -48,17 +72,17 @@ interface GetAccessTokenParams {
 
 export async function getAccessToken({ email }: GetAccessTokenParams) {
   const doc = await getDoc({ email });
-  if (!doc) throw Error(`No doc for ${email}`);
+  if (!doc) throw new MissingEmailError(`No doc for ${email}`);
   if (doc.expires_at && Date.now() < doc.expires_at) {
     // Still active, return current token
     return doc;
   } else {
     // Need to refresh, get new token
-    const newToken = await google.getAccessToken({
+    const { access_token } = await google.getAccessToken({
       access_token: doc.access_token,
       refresh_token: doc.refresh_token,
     });
-    return upsert({ email, access_token: newToken });
+    return updateAccessToken({ email, access_token });
   }
 }
 

@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import morgan from 'morgan';
 
 import * as db from './db';
+import { MissingEmailError } from './errors';
 
 const app = express();
 const PORT = 9001;
@@ -45,6 +46,9 @@ app.post('/access_token', async (req, res) => {
     }
   } catch (error) {
     console.error(error);
+    if(error instanceof MissingEmailError) {
+      return res.json({ action: 'email-not-exist' })
+    }
     res.status(400);
     if (error.response) {
       return res.json({ error: error.response.data });
