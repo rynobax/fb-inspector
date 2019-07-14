@@ -18,6 +18,14 @@ const SuspenseList: React.ComponentType<SuspenseListProps> = (React as any)
 
 const WINDOWING_THRESHOLD = 20;
 
+const InnerList: React.FC = ({ children, ...rest }) => {
+  return (
+    <div id="innerList" {...rest}>
+      <SuspenseList revealOrder="forwards">{children}</SuspenseList>
+    </div>
+  );
+};
+
 interface BodyProps {}
 
 const Body: React.FC<BodyProps> = props => {
@@ -60,8 +68,10 @@ const Body: React.FC<BodyProps> = props => {
             itemCount={openPaths.length}
             width="100%"
             overscanCount={5}
+            useIsScrolling
+            innerElementType={InnerList}
           >
-            {({ index, style }) => {
+            {({ index, style, isScrolling }) => {
               const path = openPaths[index];
               return (
                 <Node
@@ -69,6 +79,7 @@ const Body: React.FC<BodyProps> = props => {
                   key={path.join('/')}
                   style={style}
                   ndx={index}
+                  shouldPrime={!isScrolling}
                 />
               );
             }}
@@ -77,7 +88,13 @@ const Body: React.FC<BodyProps> = props => {
           <SuspenseList revealOrder="forwards">
             {openPaths.map((path, i) => {
               return (
-                <Node path={path} key={path.join('/')} style={{}} ndx={i} />
+                <Node
+                  path={path}
+                  key={path.join('/')}
+                  style={{}}
+                  ndx={i}
+                  shouldPrime={true}
+                />
               );
             })}
           </SuspenseList>

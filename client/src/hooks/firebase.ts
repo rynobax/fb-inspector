@@ -122,14 +122,18 @@ export const useFirebase = (path: string[]): FirebaseValue => {
   }
 };
 
-export const usePrimeFirebase = (path: string[]) => {
+export const usePrimeFirebase = (
+  path: string[],
+  shouldPrime: boolean = true
+) => {
   const { account, project } = useInfoForQuery();
   const pathStr = pathToString(path);
   useEffect(() => {
-    initiateRequest({
-      account,
-      pathStr,
-      projectId: project.id,
-    });
-  }, [project, pathStr, account]);
+    if (shouldPrime)
+      initiateRequest({
+        account,
+        pathStr,
+        projectId: project.id,
+      });
+  }, [project, pathStr, account, shouldPrime]);
 };
