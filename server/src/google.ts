@@ -61,25 +61,31 @@ export function initToken({ code }: InitTokenParams) {
 interface GetAccessTokenParams {
   access_token: string;
   refresh_token: string;
+  expiry_date: number;
 }
 
 interface GetAccessTokenResponse {
   access_token: string;
+  expires_at: number;
 }
 
 export function getAccessToken({
   access_token,
   refresh_token,
+  expiry_date,
 }: GetAccessTokenParams) {
-  console.log({ access_token, refresh_token });
   const oauth2Client = new google.auth.OAuth2(client_id, SECRET, redirect_uri);
   return new Promise<GetAccessTokenResponse>((resolve, reject) => {
-    oauth2Client.setCredentials({ access_token, refresh_token });
+    oauth2Client.setCredentials({ access_token, refresh_token, expiry_date });
     oauth2Client.getAccessToken((err, res, req) => {
-      console.log(req);
       if (err) reject(err);
       else if (!res) reject(`Got empty access token`);
-      else resolve({ access_token: res });
+      else if (!req) reject('Did not get expiry_date');
+      else {
+        const { expiry_date } = req.data;
+        const expires_at = expiry_date - GRACE_PADDING;
+        resolve({ access_token: res, expires_at });
+      }
     });
   });
 }

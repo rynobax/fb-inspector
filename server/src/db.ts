@@ -35,11 +35,16 @@ function upsert(doc: Doc) {
 interface UpdateAccessTokenParams {
   email: string;
   access_token: string;
+  expires_at: number;
 }
 
-function updateAccessToken({ email, access_token }: UpdateAccessTokenParams) {
+function updateAccessToken({
+  email,
+  access_token,
+  expires_at,
+}: UpdateAccessTokenParams) {
   return new Promise<Doc>((resolve, reject) => {
-    db.update({ email }, { access_token }, {}, err => {
+    db.update({ email }, { $set: { access_token, expires_at } }, {}, err => {
       if (err) reject(err);
       else {
         getDoc({ email })
@@ -78,11 +83,12 @@ export async function getAccessToken({ email }: GetAccessTokenParams) {
     return doc;
   } else {
     // Need to refresh, get new token
-    const { access_token } = await google.getAccessToken({
+    const { access_token, expires_at } = await google.getAccessToken({
       access_token: doc.access_token,
       refresh_token: doc.refresh_token,
+      expiry_date: doc.expires_at,
     });
-    return updateAccessToken({ email, access_token });
+    return updateAccessToken({ email, access_token, expires_at });
   }
 }
 

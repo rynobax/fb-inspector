@@ -27,7 +27,8 @@ app.post('/access_token', async (req, res) => {
   try {
     if (req.query.email) {
       console.log('cache');
-      const { email } = req.query;
+      let { email }: { email: string } = req.query;
+      email = email.toLowerCase();
       const { access_token, expires_at } = await db.getAccessToken({
         email,
       });
@@ -36,7 +37,7 @@ app.post('/access_token', async (req, res) => {
       return res.json(ret);
     } else {
       console.log('no cache');
-      const { code } = req.query;
+      const { code }: { code: string } = req.query;
       const { access_token, expires_at, email } = await db.initToken({
         code,
       });
@@ -46,8 +47,8 @@ app.post('/access_token', async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    if(error instanceof MissingEmailError) {
-      return res.json({ action: 'email-not-exist' })
+    if (error instanceof MissingEmailError) {
+      return res.json({ action: 'email-not-exist' });
     }
     res.status(400);
     if (error.response) {
