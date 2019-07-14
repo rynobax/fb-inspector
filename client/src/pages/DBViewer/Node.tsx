@@ -54,16 +54,21 @@ interface NodeProps {
 
 const Node: React.FC<NodeProps> = memo(({ path, style, ndx }) => {
   const { open, toggle } = useIsPathOpen(path, ndx === 0);
-  const { setPath } = usePath();
+  const { setPath, path: basePath } = usePath();
   const key = path[path.length - 1] || '/';
   usePrimeFirebase(path);
 
+  const depth = path.length - basePath.length;
+  const isTopLevel = depth === 0;
+
   return (
-    <Container open={open} depth={path.length} style={style}>
+    <Container depth={depth} style={style}>
       <Label>
-        <Suspense fallback={<ExpandPlaceholder />}>
-          <SuspendedExpand toggle={toggle} open={open} path={path} />
-        </Suspense>
+        {isTopLevel ? null : (
+          <Suspense fallback={<ExpandPlaceholder />}>
+            <SuspendedExpand toggle={toggle} open={open} path={path} />
+          </Suspense>
+        )}
         <Key expandable={true} onClick={() => setPath(path)}>
           {key}{' '}
         </Key>
@@ -75,10 +80,10 @@ const Node: React.FC<NodeProps> = memo(({ path, style, ndx }) => {
   );
 });
 
-const Container = styled.div<{ open: boolean; depth: number }>`
+const Container = styled.div<{ depth: number }>`
   display: flex;
-  flex-direction: ${p => (p.open ? 'column' : 'row')};
-  margin-left: ${p => p.depth * 14}px;
+  flex-direction: row;
+  margin-left: ${p => Math.max(p.depth - 1, 0) * 14}px;
 `;
 
 const EXPAND_SIZE = 18;

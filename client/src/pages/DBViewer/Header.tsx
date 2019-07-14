@@ -9,8 +9,6 @@ import User from 'icons/User';
 
 import AccountsModal from 'components/AccountsModal';
 
-type OpenValues = 'closed' | 'editing' | 'adding';
-
 interface HeaderProps {}
 
 const Header: React.FC<HeaderProps> = props => {

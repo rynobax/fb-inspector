@@ -7,6 +7,7 @@ import Node, { ROW_HEIGHT } from './Node';
 import { usePath, usePathArr } from 'hooks/path';
 import { useProject } from 'hooks/project';
 import { useComponentSize } from 'hooks/sizing';
+import ChevronRight from 'icons/ChevronRight';
 
 interface SuspenseListProps {
   revealOrder: 'together' | 'forwards' | 'backwards';
@@ -20,7 +21,7 @@ const WINDOWING_THRESHOLD = 20;
 interface BodyProps {}
 
 const Body: React.FC<BodyProps> = props => {
-  const { path, pathStr, setPath } = usePath();
+  const { path, setPath } = usePath();
   const { project } = useProject();
   const openPaths = usePathArr();
   const contentRef = useRef<HTMLDivElement>(null);
@@ -38,22 +39,18 @@ const Body: React.FC<BodyProps> = props => {
   return (
     <Container>
       <Nav>
-        <input
-          key={pathStr}
-          defaultValue={pathStr.slice(1)}
-          onBlur={e => {
-            const newPath = e.target.value.split('/').filter(e => !!e);
-            setPath(newPath);
-          }}
-        />
-        <div style={{ marginBottom: 12 }}>
+        <PathLinks>
           <Link onClick={() => setPath(pathAt(0))}>/</Link>
-          {path.map((p, i) => (
-            <Link key={i} onClick={() => setPath(pathAt(i + 1))}>
-              {p}
-            </Link>
-          ))}
-        </div>
+          {path.map((p, i) => {
+            const last = path.length === i;
+            return (
+              <React.Fragment key={i}>
+                {!last && <ChevronRight size={24} />}
+                <Link onClick={() => setPath(pathAt(i + 1))}>{p}</Link>
+              </React.Fragment>
+            );
+          })}
+        </PathLinks>
       </Nav>
       <Content ref={contentRef}>
         {shouldWindow ? (
@@ -66,13 +63,22 @@ const Body: React.FC<BodyProps> = props => {
           >
             {({ index, style }) => {
               const path = openPaths[index];
-              return <Node path={path} key={path.join('/')} style={style} ndx={index} />;
+              return (
+                <Node
+                  path={path}
+                  key={path.join('/')}
+                  style={style}
+                  ndx={index}
+                />
+              );
             }}
           </List>
         ) : (
           <SuspenseList revealOrder="forwards">
             {openPaths.map((path, i) => {
-              return <Node path={path} key={path.join('/')} style={{}} ndx={i} />;
+              return (
+                <Node path={path} key={path.join('/')} style={{}} ndx={i} />
+              );
             })}
           </SuspenseList>
         )}
@@ -101,6 +107,13 @@ const Link = styled.span`
     text-decoration: underline;
     cursor: pointer;
   }
+`;
+
+const PathLinks = styled.div`
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 `;
 
 export default Body;
