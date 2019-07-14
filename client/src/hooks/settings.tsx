@@ -147,8 +147,13 @@ function getConsumerStuff(
         if (expired) {
           // Refresh token if expired
           const res = await getOAuthAccessToken({ email });
-          dispatch({ type: 'googleuser-update', user: { id, ...res } });
-          return res.access_token;
+          if (!res) {
+            dispatch({ type: 'googleuser-remove', id });
+            throw Error(`Reauth for ${email} required, reload page`)
+          } else {
+            dispatch({ type: 'googleuser-update', user: { id, ...res } });
+            return res.access_token;
+          }
         } else {
           return access_token;
         }

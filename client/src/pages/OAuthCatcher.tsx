@@ -31,18 +31,24 @@ const OAuthCatcher: React.FC<OAuthProps> = props => {
     const { access_token, code } = response;
     const token = access_token || code;
     if (!token) throw Error('No token!');
-    getOAuthAccessToken({ code: token })
-      .then(({ email, access_token, expires_at }) => {
-        const user = { email, access_token, expires_at };
-        actions.addUser(user);
-        setLoading(false);
-        setEmail(email);
-      })
-      .catch(err => {
-        setError(err);
-        setLoading(false);
-      });
-  }, [hash, search, actions]);
+
+    if (!loading && !email) {
+      setLoading(true);
+      getOAuthAccessToken({ code: token })
+        .then(res => {
+          if (!res) throw Error('Auth failed');
+          const { email, access_token, expires_at } = res;
+          const user = { email, access_token, expires_at };
+          actions.addUser(user);
+          setLoading(false);
+          setEmail(email);
+        })
+        .catch(err => {
+          setError(err);
+          setLoading(false);
+        });
+    }
+  }, [hash, search, actions, loading, email]);
 
   if (loading) return <div>Loading</div>;
   if (error) throw error;

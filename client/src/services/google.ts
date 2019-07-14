@@ -12,10 +12,18 @@ interface OAuthError {
   error: string | {};
 }
 
-type OAuthResponse = OAuthSuccess | OAuthError;
+interface OAuthMissingEmail {
+  action: 'email-not-exist';
+}
+
+type OAuthResponse = OAuthSuccess | OAuthError | OAuthMissingEmail;
 
 function isOauthError(res: OAuthResponse): res is OAuthError {
   return !!(res as OAuthError).error;
+}
+
+function isOauthMissingEmail(res: OAuthResponse): res is OAuthMissingEmail {
+  return (res as OAuthMissingEmail).action === 'email-not-exist';
 }
 
 type OAuthLookupParams = { email: string } | { code: string };
@@ -27,8 +35,9 @@ export async function getOAuthAccessToken(params: OAuthLookupParams) {
   const url = `${BASE_URL}/access_token?${queryParams}`;
   const res = await ky.post(url);
   const data: OAuthResponse = await res.json();
-  if (isOauthError(data)) throw Error(JSON.stringify(data));
-  return data;
+  if(isOauthMissingEmail(data)) return null;
+  else if (isOauthError(data)) throw Error(JSON.stringify(data));
+  else return data;
 }
 
 const client_id =

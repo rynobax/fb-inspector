@@ -1,6 +1,6 @@
 - now -
-does refreshing token work?  It wasn't working immediately
 requesting too many times initially
+does refreshing token work?  It wasn't working immediately
 
 - future -
 allow show/hide projects
