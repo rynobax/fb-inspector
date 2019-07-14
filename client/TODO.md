@@ -22,3 +22,6 @@ migrate serialized data
 can use websockets to maybe get perf gains
 preload if nothing else to do
 save open state between projects
+
+-- issues --
+slow on dotaranktracker

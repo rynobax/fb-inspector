@@ -13,7 +13,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "inlineSourceMap": true
   },
   "exclude": ["node_modules", "build"]
 }
