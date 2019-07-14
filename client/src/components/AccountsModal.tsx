@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Dialog } from '@reach/dialog';
 import styled from 'sc';
+import { Dialog } from '@reach/dialog';
+import Tooltip from 'components/Tooltip';
 
 import { openOathRegister } from 'services/google';
 import { useSettings } from 'hooks/settings';
@@ -26,8 +27,10 @@ const AccountsModal: React.FC<AccountsModalProps> = props => {
 
   const visibleProjects = projects.filter(p => showHidden || !p.hidden);
 
+  if (!props.open) return null;
+
   return (
-    <AddDialog isOpen={props.open} onDismiss={props.onClose}>
+    <AddDialog onDismiss={props.onClose}>
       <HeaderLabel>Linked Accounts</HeaderLabel>
       {projects.length > 0 && (
         <Row>
@@ -52,19 +55,23 @@ const AccountsModal: React.FC<AccountsModalProps> = props => {
               return (
                 <ProjectRow key={project.id}>
                   <RowText>{project.name}</RowText>
-                  <IconButton
-                    onClick={() =>
-                      project.hidden
-                        ? actions.showProject(project.id)
-                        : actions.hideProject(project.id)
-                    }
+                  <Tooltip
+                    label={project.hidden ? 'Show Project' : 'Hide Project'}
                   >
-                    {project.hidden ? (
-                      <Hidden size={16} />
-                    ) : (
-                      <Visible size={16} />
-                    )}
-                  </IconButton>
+                    <IconButton
+                      onClick={() =>
+                        project.hidden
+                          ? actions.showProject(project.id)
+                          : actions.hideProject(project.id)
+                      }
+                    >
+                      {project.hidden ? (
+                        <Hidden size={16} />
+                      ) : (
+                        <Visible size={16} />
+                      )}
+                    </IconButton>
+                  </Tooltip>
                 </ProjectRow>
               );
             })}

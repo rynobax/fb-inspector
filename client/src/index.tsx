@@ -5,6 +5,7 @@ import './assets/root.css';
 import './assets/reach.css';
 import '@reach/menu-button/styles.css';
 import "@reach/dialog/styles.css";
+import "@reach/tooltip/styles.css";
 
 import Setup from './Setup';
 // import Test from './Test';

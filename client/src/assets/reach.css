@@ -33,3 +33,8 @@
 [data-selected] .secondary {
   fill: white;
 }
+
+[data-reach-tooltip] {
+  background: black !important;
+  color: white !important;
+}
