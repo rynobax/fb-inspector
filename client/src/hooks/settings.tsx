@@ -39,6 +39,16 @@ interface ProjectAdd {
   project: Project;
 }
 
+interface ProjectHide {
+  type: 'project-hide';
+  id: string;
+}
+
+interface ProjectShow {
+  type: 'project-show';
+  id: string;
+}
+
 interface GoogleUserAdd {
   type: 'googleuser-add';
   user: Omit<GoogleUser, 'id'>;
@@ -57,6 +67,8 @@ interface GoogleUserUpdate {
 type SettingsAction =
   | SettingsSet
   | ProjectAdd
+  | ProjectShow
+  | ProjectHide
   | GoogleUserAdd
   | GoogleUserUpdate
   | GoogleUserRemove;
@@ -74,6 +86,16 @@ function getUpdatedState(state: Settings, action: SettingsAction) {
           // Update it
           s.projects[ndx] = project;
         }
+      });
+    case 'project-hide':
+      return produce(state, s => {
+        const project = s.projects.find(s => s.id === action.id);
+        if (project) project.hidden = true;
+      });
+    case 'project-show':
+      return produce(state, s => {
+        const project = s.projects.find(s => s.id === action.id);
+        if (project) project.hidden = false;
       });
     case 'googleuser-add':
       return produce(state, s => {
@@ -129,6 +151,8 @@ interface ActionCreators {
     user: Pick<GoogleUser, 'email' | 'access_token' | 'expires_at'>
   ) => void;
   removeUser: (id: string) => void;
+  hideProject: (id: string) => void;
+  showProject: (id: string) => void;
 }
 
 // Nicer version of state for ui
@@ -149,7 +173,7 @@ function getConsumerStuff(
           const res = await getOAuthAccessToken({ email });
           if (!res) {
             dispatch({ type: 'googleuser-remove', id });
-            throw Error(`Reauth for ${email} required, reload page`)
+            throw Error(`Reauth for ${email} required, reload page`);
           } else {
             dispatch({ type: 'googleuser-update', user: { id, ...res } });
             return res.access_token;
@@ -179,6 +203,7 @@ function getConsumerStuff(
                 id: project.projectId,
                 name: project.displayName,
                 ownerUserId: account.id,
+                hidden: false,
               },
             })
           );
@@ -187,6 +212,8 @@ function getConsumerStuff(
     },
     addUser: user => dispatch({ type: 'googleuser-add', user }),
     removeUser: id => dispatch({ type: 'googleuser-remove', id }),
+    hideProject: id => dispatch({ type: 'project-hide', id }),
+    showProject: id => dispatch({ type: 'project-show', id }),
   };
   return [consumerState, actionCreators] as [ConsumerSettings, ActionCreators];
 }

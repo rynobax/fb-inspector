@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog } from '@reach/dialog';
 import styled from 'sc';
 
-import Add from 'icons/Add';
-
 import { openOathRegister } from 'services/google';
 import { useSettings } from 'hooks/settings';
+
 import Button from 'components/Button';
+
+import Add from 'icons/Add';
 import Refresh from 'icons/Refresh';
-import Remove from 'icons/Close';
+import Close from 'icons/Close';
+import Hidden from 'icons/Hidden';
+import Visible from 'icons/Visible';
 
 interface AccountsModalProps {
   open: boolean;
@@ -18,28 +21,59 @@ interface AccountsModalProps {
 const AccountsModal: React.FC<AccountsModalProps> = props => {
   const { settings, actions } = useSettings();
   const { accounts, projects } = settings;
+
+  const [showHidden, setShowHidden] = useState(false);
+
+  const visibleProjects = projects.filter(p => showHidden || !p.hidden);
+
   return (
     <AddDialog isOpen={props.open} onDismiss={props.onClose}>
-      <HeaderLabel>Accounts</HeaderLabel>
-      {accounts.length === 0 && <div>No accounts!</div>}
+      <HeaderLabel>Linked Accounts</HeaderLabel>
+      {projects.length > 0 && (
+        <Row>
+          <ShowLink onClick={() => setShowHidden(!showHidden)}>
+            {showHidden ? 'Hide' : 'Show'} hidden projects
+          </ShowLink>
+        </Row>
+      )}
       {accounts.map(account => {
+        const accountProjects = visibleProjects.filter(
+          p => p.ownerUserId === account.id
+        );
         return (
-          <Row key={account.id}>
-            <RemoveButton onClick={() => actions.removeUser(account.id)}>
-              <Remove size={24} />
-            </RemoveButton>
-            <RowText>{account.email}</RowText>
-          </Row>
+          <AccountSection key={account.id}>
+            <AccountRow>
+              <AccountText>{account.email}</AccountText>
+              <IconButton onClick={() => actions.removeUser(account.id)}>
+                <Close size={24} />
+              </IconButton>
+            </AccountRow>
+            {accountProjects.map(project => {
+              return (
+                <ProjectRow key={project.id}>
+                  <RowText>{project.name}</RowText>
+                  <IconButton
+                    onClick={() =>
+                      project.hidden
+                        ? actions.showProject(project.id)
+                        : actions.hideProject(project.id)
+                    }
+                  >
+                    {project.hidden ? (
+                      <Hidden size={16} />
+                    ) : (
+                      <Visible size={16} />
+                    )}
+                  </IconButton>
+                </ProjectRow>
+              );
+            })}
+          </AccountSection>
         );
       })}
       <StyledButton Icon={Add} onClick={openOathRegister}>
-        Add Account
+        Link Additional Account
       </StyledButton>
-      <HeaderLabel>Projects</HeaderLabel>
-      {projects.length === 0 && <div>No projects!</div>}
-      {projects.map(project => {
-        return <Row key={project.id}>{project.name}</Row>;
-      })}
       <StyledButton Icon={Refresh} onClick={actions.refreshProjects}>
         Refresh Projects
       </StyledButton>
@@ -52,8 +86,8 @@ const AddDialog = styled(Dialog)`
 `;
 
 const HeaderLabel = styled.div`
-  color: ${p => p.theme.color.text.light};
-  font-size: ${p => p.theme.font.size[24]};
+  color: ${p => p.theme.color.text.dark};
+  font-size: ${p => p.theme.font.size[36]};
   margin-bottom: 16px;
 `;
 
@@ -68,16 +102,34 @@ const Row = styled.div`
   align-items: center;
 `;
 
-const RemoveButton = styled.button`
+const AccountRow = styled(Row)``;
+
+const ProjectRow = styled(Row)``;
+
+const IconButton = styled.button`
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-right: 8px;
+  margin-left: 8px;
 `;
 
 const RowText = styled.div`
   /* Align text with button */
   margin-bottom: 2px;
+`;
+
+const AccountText = styled(RowText)`
+  color: ${p => p.theme.color.text.dark};
+  font-weight: ${p => p.theme.font.weight.bold};
+`;
+
+const ShowLink = styled.button`
+  color: ${p => p.theme.color.text.light};
+  font-size: ${p => p.theme.font.size[14]};
+`;
+
+const AccountSection = styled.div`
+  margin-bottom: 42px;
 `;
 
 export default AccountsModal;

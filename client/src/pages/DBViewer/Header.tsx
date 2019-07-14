@@ -26,12 +26,12 @@ const Header: React.FC<HeaderProps> = props => {
             <ChevronDown size={24} />
           </ProjectButton>
           <MenuList className="slide-down">
-            {projects.map(p => {
-              const selectedMark =
-                project && project.id === p.id ? '> ' : '';
+            {projects.filter(p => !p.hidden).map(p => {
+              const selectedMark = project && project.id === p.id ? '> ' : '';
               return (
                 <MenuItem key={p.id} onSelect={() => selectProject(p.id)}>
-                  {selectedMark}{p.name}
+                  {selectedMark}
+                  {p.name}
                 </MenuItem>
               );
             })}
@@ -42,12 +42,7 @@ const Header: React.FC<HeaderProps> = props => {
           </MenuList>
         </Menu>
       </Content>
-      {open && (
-        <AccountsModal
-          open={open}
-          onClose={() => setOpen(false)}
-        />
-      )}
+      {open && <AccountsModal open={open} onClose={() => setOpen(false)} />}
     </Bar>
   );
 };

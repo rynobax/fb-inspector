@@ -3,7 +3,7 @@ import { ThemeProvider } from 'styled-components';
 
 import Routing from 'pages/Routing';
 import TopLevelErrorBoundary from 'components/TopLevelErrorBoundary';
-import { theme } from 'sc';
+import theme from 'theme';
 import { useSettings, SettingsContextProvider } from 'hooks/settings';
 
 const Setup: React.FC = () => {

@@ -1,9 +1,8 @@
 - now -
-requesting too many times initially
+allow show/hide projects
 does refreshing token work?  It wasn't working immediately
 
 - future -
-allow show/hide projects
 visually seperate projects with different accounts
 search within view
 better ui for path editing not in url

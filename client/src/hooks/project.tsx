@@ -8,6 +8,7 @@ export interface Project {
   id: string;
   name: string;
   ownerUserId: string;
+  hidden: boolean;
 }
 
 interface ProjectContextType {
