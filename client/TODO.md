@@ -1,11 +1,13 @@
 - now -
-does refreshing token work?  It wasn't working immediately
+better ui for path editing not in url
+export current path
+link to real firebase for editing
+search box
+
 
 - future -
 search within view
-better ui for path editing not in url
 show tooltip with uid as time
-link to real firebase for editing
 -- release --
 for projects, store added time for consistant sorting
 Warning: The following components suspended during a user-blocking update: SuspendedExpand, SuspendedValue
