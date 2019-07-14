@@ -1,4 +1,4 @@
-import React, { Suspense, memo } from 'react';
+import React, { Suspense, memo, isValidElement } from 'react';
 import styled from 'styled-components';
 
 import Add from 'icons/Add';
@@ -7,8 +7,10 @@ import Remove from 'icons/Remove';
 import { useFirebase, usePrimeFirebase } from 'hooks/firebase';
 import { usePath, useIsPathOpen } from 'hooks/path';
 import { FirebaseValue } from 'stores/firebase';
+import { getTimeStrFromKey } from 'services/util';
+import Tooltip from 'components/Tooltip';
 
-export const ROW_HEIGHT = 32;
+export const ROW_HEIGHT = 28;
 
 function getValueString(v: FirebaseValue) {
   switch (typeof v) {
@@ -63,22 +65,39 @@ const Node: React.FC<NodeProps> = memo(({ path, style, ndx }) => {
 
   return (
     <Container depth={depth} style={style}>
-      <Label>
-        {isTopLevel ? null : (
-          <Suspense fallback={<ExpandPlaceholder />}>
-            <SuspendedExpand toggle={toggle} open={open} path={path} />
-          </Suspense>
-        )}
-        <Key expandable={true} onClick={() => setPath(path)}>
-          {key}{' '}
-        </Key>
-      </Label>
+      <TooltipWrapper keyStr={key}>
+        <Label>
+          {isTopLevel ? null : (
+            <Suspense fallback={<ExpandPlaceholder />}>
+              <SuspendedExpand toggle={toggle} open={open} path={path} />
+            </Suspense>
+          )}
+          <Key expandable={true} onClick={() => setPath(path)}>
+            {key}{' '}
+          </Key>
+        </Label>
+      </TooltipWrapper>
       <Suspense fallback={<div>Loading...</div>}>
         <SuspendedValue path={path} />
       </Suspense>
     </Container>
   );
 });
+
+interface TooltipWrapperProps {
+  keyStr: string;
+  children: React.ReactNode;
+}
+
+const TooltipWrapper: React.FC<TooltipWrapperProps> = ({
+  children,
+  keyStr,
+}) => {
+  if (!isValidElement(children)) throw Error('Tooltip needs children');
+  const time = getTimeStrFromKey(keyStr);
+  if (!time) return children;
+  else return <Tooltip label={time}>{children}</Tooltip>;
+};
 
 const Container = styled.div<{ depth: number }>`
   display: flex;

@@ -1,13 +1,12 @@
 - now -
-better ui for path editing not in url
-export current path
-link to real firebase for editing
+show tooltip with uid as time
+link to real firebase
 search box
+export current path
 
 
 - future -
 search within view
-show tooltip with uid as time
 -- release --
 for projects, store added time for consistant sorting
 Warning: The following components suspended during a user-blocking update: SuspendedExpand, SuspendedValue
@@ -24,3 +23,8 @@ save open state between projects
 
 -- issues --
 slow on dotaranktracker
+firebase keys are not sorted properly sometimes:
+-LjETJxjC4D4qd2If9V1
+-LjgBG8PfX1b0ao11Hrr
+-LjGofqVYWzdUeRg6oYz
+-LjgoQwTC__RF-1xMylo
