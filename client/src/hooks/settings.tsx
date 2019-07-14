@@ -82,9 +82,6 @@ function getUpdatedState(state: Settings, action: SettingsAction) {
         if (ndx === -1) {
           // It's new!
           s.projects.push(project);
-        } else {
-          // Update it
-          s.projects[ndx] = project;
         }
       });
     case 'project-hide':
@@ -200,7 +197,7 @@ function getConsumerStuff(
             dispatch({
               type: 'project-add',
               project: {
-                id: project.projectId,
+                id: project.resources.realtimeDatabaseInstance,
                 name: project.displayName,
                 ownerUserId: account.id,
                 hidden: false,
