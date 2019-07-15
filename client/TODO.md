@@ -28,3 +28,5 @@ firebase keys are not sorted properly sometimes:
 -LjgBG8PfX1b0ao11Hrr
 -LjGofqVYWzdUeRg6oYz
 -LjgoQwTC__RF-1xMylo
+
+switching projects doesnt load data

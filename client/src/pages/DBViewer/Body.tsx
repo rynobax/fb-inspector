@@ -20,7 +20,7 @@ const WINDOWING_THRESHOLD = 20;
 
 const InnerList: React.FC = ({ children, ...rest }) => {
   return (
-    <div id="innerList" {...rest}>
+    <div {...rest}>
       <SuspenseList revealOrder="forwards">{children}</SuspenseList>
     </div>
   );
@@ -69,7 +69,6 @@ const Body: React.FC<BodyProps> = props => {
             width="100%"
             overscanCount={5}
             useIsScrolling
-            innerElementType={InnerList}
           >
             {({ index, style, isScrolling }) => {
               const path = openPaths[index];
