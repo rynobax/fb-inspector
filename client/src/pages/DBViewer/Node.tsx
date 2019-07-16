@@ -26,12 +26,12 @@ function getValueString(v: FirebaseValue) {
   }
 }
 
-const SuspendedValue: React.FC<{ path: string[] }> = memo(({ path }) => {
+const Value: React.FC<{ path: string[] }> = memo(({ path }) => {
   const data = useFirebase(path);
   return <>{getValueString(data)}</>;
 });
 
-const SuspendedExpand: React.FC<{
+const Expand: React.FC<{
   path: string[];
   toggle: () => void;
   open: boolean;
@@ -42,9 +42,9 @@ const SuspendedExpand: React.FC<{
 
   const iconSize = 16;
   return (
-    <Expand onClick={toggle}>
+    <ExpandButton onClick={toggle}>
       {open ? <Remove size={iconSize} /> : <Add size={iconSize} />}
-    </Expand>
+    </ExpandButton>
   );
 });
 
@@ -59,6 +59,7 @@ const Node: React.FC<NodeProps> = memo(({ path, style, ndx, shouldPrime }) => {
   const { open, toggle } = useIsPathOpen(path, ndx === 0);
   const { setPath, path: basePath } = usePath();
   const key = path[path.length - 1] || '/';
+  // The nodes will fetch one at a time unless they have this prime
   usePrimeFirebase(path, shouldPrime);
 
   const depth = path.length - basePath.length;
@@ -70,7 +71,7 @@ const Node: React.FC<NodeProps> = memo(({ path, style, ndx, shouldPrime }) => {
         <Label>
           {isTopLevel ? null : (
             <Suspense fallback={<ExpandPlaceholder />}>
-              <SuspendedExpand toggle={toggle} open={open} path={path} />
+              <Expand toggle={toggle} open={open} path={path} />
             </Suspense>
           )}
           <Key expandable={true} onClick={() => setPath(path)}>
@@ -79,7 +80,7 @@ const Node: React.FC<NodeProps> = memo(({ path, style, ndx, shouldPrime }) => {
         </Label>
       </TooltipWrapper>
       <Suspense fallback={<LoadingBar />}>
-        <SuspendedValue path={path} />
+        <Value path={path} />
       </Suspense>
     </Container>
   );
@@ -109,7 +110,7 @@ const Container = styled.div<{ depth: number }>`
 
 const EXPAND_SIZE = 18;
 const EXPAND_MARGIN = 8;
-const Expand = styled.button`
+const ExpandButton = styled.button`
   width: ${EXPAND_SIZE}px;
   height: ${EXPAND_SIZE}px;
   margin-right: ${EXPAND_MARGIN}px;

@@ -16,15 +16,8 @@ interface SuspenseListProps {
 const SuspenseList: React.ComponentType<SuspenseListProps> = (React as any)
   .unstable_SuspenseList;
 
-const WINDOWING_THRESHOLD = 20;
-
-const InnerList: React.FC = ({ children, ...rest }) => {
-  return (
-    <div {...rest}>
-      <SuspenseList revealOrder="forwards">{children}</SuspenseList>
-    </div>
-  );
-};
+// If they don't all fit on a 4k screen use windowing!
+const WINDOWING_THRESHOLD = 2160 / ROW_HEIGHT;
 
 interface BodyProps {}
 
@@ -67,7 +60,6 @@ const Body: React.FC<BodyProps> = props => {
             itemSize={ROW_HEIGHT}
             itemCount={openPaths.length}
             width="100%"
-            overscanCount={5}
             useIsScrolling
           >
             {({ index, style, isScrolling }) => {

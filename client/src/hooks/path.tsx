@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { observe } from 'mobx';
 import { navigate } from '@reach/router';
+import throttle from 'lodash/throttle';
 
 import { openStore, dataStore } from 'stores/firebase';
 
@@ -102,7 +103,12 @@ export const usePathArr = () => {
   const { path } = usePath();
   const [childrenPath, setChildrenPath] = useState(() => getChildrenPath(path));
   useEffect(() => {
-    const updatePath = () => setChildrenPath(getChildrenPath(path));
+    const updatePath = throttle(
+      () => {
+        setChildrenPath(getChildrenPath(path));
+      },
+      250,
+    );
     updatePath();
     const openCleanup = openStore.observe(() => {
       updatePath();
@@ -115,7 +121,7 @@ export const usePathArr = () => {
     return () => {
       openCleanup();
       dataCleanup();
-    }
+    };
   }, [path]);
   return childrenPath;
 };
