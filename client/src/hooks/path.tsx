@@ -3,7 +3,7 @@ import { observe } from 'mobx';
 import { navigate } from '@reach/router';
 import throttle from 'lodash/throttle';
 
-import { openStore, dataStore } from 'stores/firebase';
+import { openStore, dataStore } from 'stores/store';
 
 interface PathContextType {
   path: string[];

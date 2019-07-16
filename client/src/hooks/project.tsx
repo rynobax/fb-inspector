@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { navigate } from '@reach/router';
 
 import { useSettings } from './settings';
-import { resetData, resetOpen } from 'stores/firebase';
+import { resetData, resetOpen } from 'stores/store';
 
 export interface Project {
   id: string;

@@ -3,7 +3,7 @@ import ky from 'ky';
 
 import { useProject } from './project';
 import { pathToString } from './path';
-import { dataStore, FirebaseValue, Status } from 'stores/firebase';
+import { dataStore, FirebaseValue, Status } from 'stores/store';
 import { useSettings, GoogleAccount } from './settings';
 
 function params(obj: { [k: string]: string | boolean }) {
@@ -42,7 +42,6 @@ async function queryData({
 // const wait = (ms: number) => new Promise(r => setTimeout(() => r(), ms));
 
 function initiateRequest({ account, pathStr, projectId }: RequestParams) {
-  console.log('starting req');
   const val = dataStore.get(pathStr);
   if (!val) {
     // Haven't cached, kick off request
@@ -95,18 +94,11 @@ const useInfoForQuery = () => {
   return { account, project };
 };
 
-export const useFirebase = (
-  path: string[],
-  shouldFetch: boolean
-): FirebaseValue => {
+export const useFirebase = (path: string[]): FirebaseValue => {
   const { account, project } = useInfoForQuery();
 
   const pathStr = pathToString(path);
   const val = dataStore.get(pathStr);
-  if(!shouldFetch) {
-    if(val && val.status === Status.SUCCESS) return val.value
-    else return null;
-  }
 
   if (!val) {
     // Haven't cached, kick off request
@@ -131,7 +123,21 @@ export const useFirebase = (
   }
 };
 
-export const usePrimeFirebase = (path: string[], shouldPrime: boolean) => {
+export const useFirebaseSync = (path: string[]) => {
+  const pathStr = pathToString(path);
+  const val = dataStore.get(pathStr);
+  if (val && val.status === Status.SUCCESS) {
+    return val.value;
+  } else {
+    return undefined;
+  }
+};
+
+export const usePrimeFirebase = (
+  path: string[],
+  // When scrolling we want to disable priming
+  shouldPrime: boolean
+) => {
   const { account, project } = useInfoForQuery();
   const pathStr = pathToString(path);
   useEffect(() => {
