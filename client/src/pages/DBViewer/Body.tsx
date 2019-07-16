@@ -70,7 +70,7 @@ const Body: React.FC<BodyProps> = props => {
                   key={path.join('/')}
                   style={style}
                   ndx={index}
-                  shouldPrime={!isScrolling}
+                  shouldFetch={!isScrolling}
                 />
               );
             }}
@@ -84,7 +84,7 @@ const Body: React.FC<BodyProps> = props => {
                   key={path.join('/')}
                   style={{}}
                   ndx={i}
-                  shouldPrime={true}
+                  shouldFetch={true}
                 />
               );
             })}

@@ -26,17 +26,21 @@ function getValueString(v: FirebaseValue) {
   }
 }
 
-const Value: React.FC<{ path: string[] }> = memo(({ path }) => {
-  const data = useFirebase(path);
+const Value: React.FC<{ path: string[]; shouldFetch: boolean }> = ({
+  path,
+  shouldFetch,
+}) => {
+  const data = useFirebase(path, shouldFetch);
   return <>{getValueString(data)}</>;
-});
+};
 
 const Expand: React.FC<{
   path: string[];
   toggle: () => void;
   open: boolean;
-}> = memo(({ path, toggle, open }) => {
-  const data = useFirebase(path);
+  shouldFetch: boolean;
+}> = ({ path, toggle, open, shouldFetch }) => {
+  const data = useFirebase(path, shouldFetch);
   const isObject = !!(data && typeof data === 'object');
   if (!isObject) return <ExpandPlaceholder />;
 
@@ -46,21 +50,21 @@ const Expand: React.FC<{
       {open ? <Remove size={iconSize} /> : <Add size={iconSize} />}
     </ExpandButton>
   );
-});
+};
 
 interface NodeProps {
   path: string[];
   style: React.CSSProperties;
   ndx: number;
-  shouldPrime: boolean;
+  shouldFetch: boolean;
 }
 
-const Node: React.FC<NodeProps> = memo(({ path, style, ndx, shouldPrime }) => {
+const Node: React.FC<NodeProps> = memo(({ path, style, ndx, shouldFetch }) => {
   const { open, toggle } = useIsPathOpen(path, ndx === 0);
   const { setPath, path: basePath } = usePath();
   const key = path[path.length - 1] || '/';
   // The nodes will fetch one at a time unless they have this prime
-  usePrimeFirebase(path, shouldPrime);
+  usePrimeFirebase(path, shouldFetch);
 
   const depth = path.length - basePath.length;
   const isTopLevel = depth === 0;
@@ -71,7 +75,7 @@ const Node: React.FC<NodeProps> = memo(({ path, style, ndx, shouldPrime }) => {
         <Label>
           {isTopLevel ? null : (
             <Suspense fallback={<ExpandPlaceholder />}>
-              <Expand toggle={toggle} open={open} path={path} />
+              <Expand toggle={toggle} open={open} path={path} shouldFetch={shouldFetch} />
             </Suspense>
           )}
           <Key expandable={true} onClick={() => setPath(path)}>
@@ -80,7 +84,7 @@ const Node: React.FC<NodeProps> = memo(({ path, style, ndx, shouldPrime }) => {
         </Label>
       </TooltipWrapper>
       <Suspense fallback={<LoadingBar />}>
-        <Value path={path} />
+        <Value path={path} shouldFetch={true} />
       </Suspense>
     </Container>
   );
