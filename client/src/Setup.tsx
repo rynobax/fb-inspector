@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import Routing from 'pages/Routing';
@@ -12,9 +12,7 @@ const Setup: React.FC = () => {
       <ThemeProvider theme={theme}>
         <TopLevelErrorBoundary>
           <SettingsContextProvider>
-            <Suspense fallback={<div>Fallback</div>}>
-              <Routing />
-            </Suspense>
+            <Routing />
             <SettingsRefresher />
           </SettingsContextProvider>
         </TopLevelErrorBoundary>

@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import ky from 'ky';
 
 import { useProject } from './project';
 import { pathToString } from './path';
-import { dataStore, FirebaseValue, Status } from 'stores/store';
+import { dataStore, FirebaseValue, Status, DataStoreObj } from 'stores/store';
 import { useSettings, GoogleAccount } from './settings';
 
 function params(obj: { [k: string]: string | boolean }) {
@@ -41,11 +41,15 @@ async function queryData({
 
 // const wait = (ms: number) => new Promise(r => setTimeout(() => r(), ms));
 
-function initiateRequest({ account, pathStr, projectId }: RequestParams) {
+function getOrQueryData({
+  account,
+  pathStr,
+  projectId,
+}: RequestParams): DataStoreObj {
   const val = dataStore.get(pathStr);
   if (!val) {
     // Haven't cached, kick off request
-    const prom = new Promise<void>(async (resolve, reject) => {
+    const prom = new Promise<DataStoreObj>(async (resolve, reject) => {
       try {
         const value = await queryData({
           account,
@@ -56,6 +60,7 @@ function initiateRequest({ account, pathStr, projectId }: RequestParams) {
         // if (pathStr.startsWith('/its/nested/')) {
         //   await wait(Math.random() * 1000 * 5);
         // }
+
         dataStore.set(pathStr, {
           status: Status.SUCCESS,
           value,
@@ -70,7 +75,10 @@ function initiateRequest({ account, pathStr, projectId }: RequestParams) {
           prom,
         });
       }
-      resolve();
+      const newVal = dataStore.get(pathStr);
+      // Should never happen, we unconditionally set above
+      if (!newVal) throw Error();
+      resolve(newVal);
     });
     dataStore.set(pathStr, {
       status: Status.PENDING,
@@ -78,9 +86,12 @@ function initiateRequest({ account, pathStr, projectId }: RequestParams) {
       error: null,
       prom,
     });
-    return prom;
+    const newVal = dataStore.get(pathStr);
+    // Should never happen, we unconditionally set above
+    if (!newVal) throw Error();
+    return newVal;
   } else {
-    return val.prom;
+    return val;
   }
 }
 
@@ -94,43 +105,59 @@ const useInfoForQuery = () => {
   return { account, project };
 };
 
-export const useFirebase = (path: string[]): FirebaseValue => {
+type UseFirebaseResponse =
+  | { loading: true; data: undefined }
+  | { loading: false; data: FirebaseValue };
+
+export const useFirebase = (path: string[]): UseFirebaseResponse => {
   const { account, project } = useInfoForQuery();
-
   const pathStr = pathToString(path);
-  const val = dataStore.get(pathStr);
-
-  if (!val) {
-    // Haven't cached, kick off request
-    const prom = initiateRequest({
+  const [res, setRes] = useState<UseFirebaseResponse>(() => {
+    const val = getOrQueryData({
       account,
       pathStr,
       projectId: project.id,
     });
-    throw prom;
-  } else {
+    if (val) {
+      return {
+        loading: false,
+        data: val.value,
+      };
+    } else {
+      return {
+        loading: true,
+        data: undefined,
+      };
+    }
+  });
+
+  useEffect(() => {
+    const val = getOrQueryData({
+      account,
+      pathStr,
+      projectId: project.id,
+    });
     switch (val.status) {
       case Status.PENDING:
-        throw val.prom;
+        setRes({ loading: true, data: undefined });
+        val.prom.then(e => {
+          setRes({ loading: false, data: e.value });
+        });
+        break;
       case Status.SUCCESS:
-        return val.value;
+        setRes({ loading: false, data: val.value });
+        break;
       case Status.ERROR:
         throw val.error;
       default:
         // Impossible
         throw Error();
     }
-  }
-};
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathStr, project.id, account.id]);
 
-export const useFirebaseSync = (path: string[]) => {
-  const pathStr = pathToString(path);
-  const val = dataStore.get(pathStr);
-  if (val && val.status === Status.SUCCESS) {
-    return val.value;
-  } else {
-    return undefined;
-  }
+  console.log(pathStr, res);
+  return res;
 };
 
 export const usePrimeFirebase = (
@@ -142,7 +169,7 @@ export const usePrimeFirebase = (
   const pathStr = pathToString(path);
   useEffect(() => {
     if (shouldPrime)
-      initiateRequest({
+      getOrQueryData({
         account,
         pathStr,
         projectId: project.id,

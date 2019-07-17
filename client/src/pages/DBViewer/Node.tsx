@@ -16,15 +16,12 @@ interface NodeProps {
   path: string[];
   style: React.CSSProperties;
   ndx: number;
-  sync: boolean;
 }
 
-const Node: React.FC<NodeProps> = memo(({ path, style, ndx, sync }) => {
+const Node: React.FC<NodeProps> = memo(({ path, style, ndx }) => {
   const { open, toggle } = useIsPathOpen(path, ndx === 0);
   const { setPath, path: basePath } = usePath();
   const key = path[path.length - 1] || '/';
-  // The nodes will fetch one at a time unless they have this prime
-  usePrimeFirebase(path, !sync);
 
   const depth = path.length - basePath.length;
   const isTopLevel = depth === 0;
@@ -34,14 +31,14 @@ const Node: React.FC<NodeProps> = memo(({ path, style, ndx, sync }) => {
       <TooltipWrapper keyStr={key}>
         <Label>
           {isTopLevel ? null : (
-            <Expand toggle={toggle} open={open} path={path} sync={sync} />
+            <Expand toggle={toggle} open={open} path={path} />
           )}
           <Key expandable={true} onClick={() => setPath(path)}>
             {key}{' '}
           </Key>
         </Label>
       </TooltipWrapper>
-      <Value path={path} sync={sync} />
+      <Value path={path} />
     </Container>
   );
 });

@@ -1,7 +1,7 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import styled from 'sc';
 
-import { useFirebaseSync, useFirebase } from 'hooks/firebase';
+import { useFirebase } from 'hooks/firebase';
 
 import Add from 'icons/Add';
 import Remove from 'icons/Remove';
@@ -10,33 +10,11 @@ interface ExpandProps {
   path: string[];
   toggle: () => void;
   open: boolean;
-  sync: boolean;
 }
 
-const Expand: React.FC<ExpandProps> = props => {
-  return (
-    <Suspense fallback={<ExpandPlaceholder />}>
-      {props.sync ? <SyncExpand {...props} /> : <SuspenseExpand {...props} />}
-    </Suspense>
-  );
-};
-
-const SuspenseExpand: React.FC<ExpandProps> = ({ path, toggle, open }) => {
-  const data = useFirebase(path);
-  const isObject = !!(data && typeof data === 'object');
-  if (!isObject) return <ExpandPlaceholder />;
-
-  const iconSize = 16;
-  return (
-    <ExpandButton onClick={toggle}>
-      {open ? <Remove size={iconSize} /> : <Add size={iconSize} />}
-    </ExpandButton>
-  );
-};
-
-const SyncExpand: React.FC<ExpandProps> = ({ path, toggle, open }) => {
-  const data = useFirebaseSync(path);
-  if (data === undefined) return <ExpandPlaceholder />;
+const Expand: React.FC<ExpandProps> = ({ path, toggle, open }) => {
+  const { data, loading } = useFirebase(path);
+  if (loading) return <ExpandPlaceholder />;
   const isObject = !!(data && typeof data === 'object');
   if (!isObject) return <ExpandPlaceholder />;
 

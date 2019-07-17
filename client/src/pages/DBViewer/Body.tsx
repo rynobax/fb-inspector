@@ -9,16 +9,6 @@ import { useProject } from 'hooks/project';
 import { useComponentSize } from 'hooks/sizing';
 import ChevronRight from 'icons/ChevronRight';
 
-interface SuspenseListProps {
-  revealOrder: 'together' | 'forwards' | 'backwards';
-}
-
-const SuspenseList: React.ComponentType<SuspenseListProps> = (React as any)
-  .unstable_SuspenseList;
-
-// If they don't all fit on a 4k screen use windowing!
-const WINDOWING_THRESHOLD = 2160 / ROW_HEIGHT;
-
 interface BodyProps {}
 
 const Body: React.FC<BodyProps> = props => {
@@ -34,8 +24,6 @@ const Body: React.FC<BodyProps> = props => {
   }
 
   if (!project) return null;
-
-  const shouldWindow = openPaths.length > WINDOWING_THRESHOLD;
 
   return (
     <Container>
@@ -54,43 +42,26 @@ const Body: React.FC<BodyProps> = props => {
         </PathLinks>
       </Nav>
       <Content ref={contentRef}>
-        {shouldWindow ? (
-          <List
-            height={size.height}
-            itemSize={ROW_HEIGHT}
-            itemCount={openPaths.length}
-            width="100%"
-            useIsScrolling
-            overscanCount={10}
-          >
-            {({ index, style, isScrolling }) => {
-              const path = openPaths[index];
-              return (
-                <Node
-                  path={path}
-                  key={path.join('/')}
-                  style={style}
-                  ndx={index}
-                  sync={!!isScrolling}
-                />
-              );
-            }}
-          </List>
-        ) : (
-          <SuspenseList revealOrder="forwards">
-            {openPaths.map((path, i) => {
-              return (
-                <Node
-                  path={path}
-                  key={path.join('/')}
-                  style={{}}
-                  ndx={i}
-                  sync={false}
-                />
-              );
-            })}
-          </SuspenseList>
-        )}
+        <List
+          height={size.height}
+          itemSize={ROW_HEIGHT}
+          itemCount={openPaths.length}
+          width="100%"
+          useIsScrolling
+          overscanCount={10}
+        >
+          {({ index, style, isScrolling }) => {
+            const path = openPaths[index];
+            return (
+              <Node
+                path={path}
+                key={path.join('/')}
+                style={style}
+                ndx={index}
+              />
+            );
+          }}
+        </List>
       </Content>
     </Container>
   );

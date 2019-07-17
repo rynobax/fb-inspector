@@ -6,9 +6,9 @@ interface FirebaseObject {
 }
 export type FirebaseValue = null | FirebaseScalar | FirebaseObject;
 
-export const dataStore = observable.map<string, StoreObj>({});
+export const dataStore = observable.map<string, DataStoreObj>({});
 
-type StoreObj = PendingObj | SuccessObj | ErrorObj;
+export type DataStoreObj = PendingObj | SuccessObj | ErrorObj;
 
 export enum Status {
   PENDING,
@@ -18,21 +18,21 @@ export enum Status {
 
 interface PendingObj {
   status: Status.PENDING;
-  prom: Promise<void>;
+  prom: Promise<DataStoreObj>;
   value: null;
   error: null;
 }
 
 interface SuccessObj {
   status: Status.SUCCESS;
-  prom: Promise<void>;
+  prom: Promise<DataStoreObj>;
   value: FirebaseValue;
   error: null;
 }
 
 interface ErrorObj {
   status: Status.ERROR;
-  prom: Promise<void>;
+  prom: Promise<DataStoreObj>;
   value: null;
   error: Error;
 }
@@ -47,7 +47,7 @@ export const resetOpen = () => {
   openStore.set('$$$$_fire_observer', true);
 };
 
-const resetProm = new Promise<void>(r => r);
+const resetProm = new Promise<DataStoreObj>(r => r);
 export const resetData = () => {
   console.log('resetting data store');
   dataStore.clear();

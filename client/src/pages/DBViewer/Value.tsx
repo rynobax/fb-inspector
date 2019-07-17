@@ -1,9 +1,9 @@
-import React, { Suspense } from 'react';
-import { useFirebaseSync, useFirebase } from 'hooks/firebase';
+import React from 'react';
+import { useFirebase } from 'hooks/firebase';
 import { FirebaseValue } from 'stores/store';
 import styled from 'sc';
 
-function getValueString(v: FirebaseValue) {
+function getValueString(v: FirebaseValue | undefined) {
   switch (typeof v) {
     case 'string':
       return `"${v}"`;
@@ -14,30 +14,18 @@ function getValueString(v: FirebaseValue) {
     case 'object':
       if (!v) return 'null';
       else return null;
+    case 'undefined':
+      throw Error(`Cannot get value string for undefined`);
   }
 }
 
 interface ValueProps {
   path: string[];
-  sync: boolean;
 }
 
-const Value: React.FC<ValueProps> = props => {
-  return (
-    <Suspense fallback={<LoadingBar />}>
-      {props.sync ? <SyncValue {...props} /> : <SuspenseValue {...props} />}
-    </Suspense>
-  );
-};
-
-const SuspenseValue: React.FC<ValueProps> = ({ path }) => {
-  const data = useFirebase(path);
-  return <>{getValueString(data)}</>;
-};
-
-const SyncValue: React.FC<ValueProps> = ({ path }) => {
-  const data = useFirebaseSync(path);
-  if (data === undefined) return null;
+const Value: React.FC<ValueProps> = ({ path }) => {
+  const { data, loading } = useFirebase(path);
+  if (loading) return null;
   return <>{getValueString(data)}</>;
 };
 
