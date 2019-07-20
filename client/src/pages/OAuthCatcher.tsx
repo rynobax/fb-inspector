@@ -42,6 +42,8 @@ const OAuthCatcher: React.FC<OAuthProps> = props => {
           actions.addUser(user);
           setLoading(false);
           setEmail(email);
+          // We got what we came for, close window
+          window.close();
         })
         .catch(err => {
           setError(err);
