@@ -24,6 +24,8 @@ app.use((_, res, next) => {
 
 // Just a proxy since we can't store secret on client
 
+app.get('/ping', (_, res) => res.json({ hello: 'world' }));
+
 app.post('/access_token', async (req, res) => {
   try {
     if (req.query.email) {
