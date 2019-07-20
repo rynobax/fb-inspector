@@ -6,7 +6,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "install-react": "node scripts/reactFromMaster.js"
+    "install-react": "node scripts/reactFromMaster.js",
+    "analyze": "source-map-explorer 'build/static/js/*.js'"
   },
   "dependencies": {
     "@reach/dialog": "^0.2.9",
@@ -34,7 +35,9 @@
     "styled-components": "^4.3.2",
     "typescript": "^3.5.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "source-map-explorer": "^2.0.1"
+  },
   "eslintConfig": {
     "extends": "react-app"
   },
