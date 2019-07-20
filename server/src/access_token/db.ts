@@ -13,7 +13,7 @@ interface Doc {
   expires_at: number;
 }
 
-const baseUrl = 'https://firebaseinspector.firebaseio.com/';
+const baseUrl = 'https://fir-inspector.firebaseio.com/';
 
 const auth = `?auth=${FB_TOKEN}`;
 
