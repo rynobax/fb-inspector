@@ -1,5 +1,5 @@
 import key from 'ky';
-import { testBig as db } from '../creds';
+import { testBig as db } from './creds';
 
 function params(obj: { [k: string]: string | boolean }) {
   let str = '';
