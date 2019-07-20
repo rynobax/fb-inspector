@@ -7,7 +7,3 @@ if (process.env.NODE_ENV === 'production') {
     dsn: process.env.SENTRY,
   });
 }
-
-import { start } from './server';
-
-start();
