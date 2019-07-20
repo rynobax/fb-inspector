@@ -1,0 +1,10 @@
+{
+  "name": "fb-inspector",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "yarn run build:server && yarn run build:client",
+    "build:server": "cd server && yarn && yarn run build",
+    "build:client": "cd client && yarn && yarn run build"
+  }
+}
