@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import morgan from 'morgan';
+import * as Sentry from '@sentry/node';
 
 import * as db from './db';
 import { MissingEmailError } from './errors';
@@ -46,6 +47,7 @@ app.post('/access_token', async (req, res) => {
       return res.json(ret);
     }
   } catch (error) {
+    Sentry.captureException(error);
     console.error(error);
     if (error instanceof MissingEmailError) {
       return res.json({ action: 'email-not-exist' });

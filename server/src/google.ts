@@ -1,8 +1,6 @@
 import { google } from 'googleapis';
 import { Credentials } from 'google-auth-library';
 
-require('dotenv').config();
-
 const { SECRET } = process.env;
 if (!SECRET) throw Error('Secret is missing, check .ENV');
 const client_id =

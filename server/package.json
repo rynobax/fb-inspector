@@ -6,9 +6,12 @@
   "scripts": {
     "start": "concurrently \"npm:watch:*\"",
     "watch:ts": "tsc -w",
-    "watch:run": "nodemon build/index.js"
+    "watch:run": "nodemon build/index.js",
+    "compile": "tsc",
+    "prod": "yarn run compile && pm2 start ecosystem.config.js --env production"
   },
   "dependencies": {
+    "@sentry/node": "^5.5.0",
     "body-parser": "^1.19.0",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
