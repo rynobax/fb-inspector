@@ -6,6 +6,20 @@ import { MissingEmailError } from './errors';
 const { FB_TOKEN } = process.env;
 if (!FB_TOKEN) throw Error('Missing FB_TOKEN enviroment variable');
 
+function esc(str: string) {
+  return `__${str}__`;
+}
+
+function getIdFromEmail(email: string) {
+  return email
+    .replace(/\./g, esc('dot'))
+    .replace(/\$/g, esc('dollar'))
+    .replace(/\[/g, esc('rb'))
+    .replace(/\]/g, esc('lb'))
+    .replace(/#/g, esc('pound'))
+    .replace(/\//g, esc('slash'));
+}
+
 interface Doc {
   email: string;
   refresh_token: string;
@@ -18,18 +32,20 @@ const baseUrl = 'https://fir-inspector.firebaseio.com';
 const auth = `?auth=${FB_TOKEN}`;
 
 const fb = {
-  get: async (id: string) => {
+  get: async (email: string) => {
+    const id = getIdFromEmail(email);
     const res = await got.get(`${baseUrl}/accounts/${id}.json${auth}`);
     return JSON.parse(res.body) as (Doc | null);
   },
-  update: async (id: string, doc: Partial<Doc>) => {
+  update: async (email: string, doc: Partial<Doc>) => {
+    const id = getIdFromEmail(email);
     await got.patch(`${baseUrl}/accounts/${id}/.json${auth}`, {
       body: JSON.stringify(doc),
     });
   },
 };
 
-async function upsert(doc: Doc) {
+async function insert(doc: Doc) {
   await fb.update(doc.email, doc);
   return doc;
 }
@@ -87,5 +103,5 @@ export async function initToken({ code }: InitTokenParams) {
     expires_at,
     email,
   } = await google.initToken({ code });
-  return upsert({ access_token, refresh_token, expires_at, email });
+  return insert({ access_token, refresh_token, expires_at, email });
 }
