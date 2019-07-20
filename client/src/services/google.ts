@@ -1,6 +1,6 @@
 import ky from 'ky';
 
-const BASE_URL = 'http://localhost:9001';
+const BASE_URL = 'https://fb-inspector.netlify.com/.netlify/functions';
 
 interface OAuthSuccess {
   email: string;
@@ -42,7 +42,7 @@ export async function getOAuthAccessToken(params: OAuthLookupParams) {
 
 const client_id =
   '561478918972-vkd6611959mpitiq8rvs6484dktic5e6.apps.googleusercontent.com';
-const redirect_uri = 'https://6781a2d3.ngrok.io/oauth';
+const redirect_uri = 'https://fb-inspector.netlify.com/oauth';
 // Required for refresh token
 const response_type = 'code';
 // Required for refresh token

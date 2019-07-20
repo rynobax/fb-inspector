@@ -5,7 +5,7 @@ const { SECRET } = process.env;
 if (!SECRET) throw Error('Secret is missing, check .ENV');
 const client_id =
   '561478918972-vkd6611959mpitiq8rvs6484dktic5e6.apps.googleusercontent.com';
-const redirect_uri = 'https://6781a2d3.ngrok.io/oauth';
+const redirect_uri = 'https://fb-inspector.netlify.com/oauth';
 
 const GRACE_PADDING = 1000 * 30;
 
