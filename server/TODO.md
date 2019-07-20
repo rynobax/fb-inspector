@@ -1,0 +1,1 @@
+- Could probably speed startup time by not using google api library?

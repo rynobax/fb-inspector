@@ -1,11 +1,10 @@
-import Datastore from 'nedb';
+import got from 'got';
+
 import * as google from './google';
 import { MissingEmailError } from './errors';
 
-const db = new Datastore<Doc>({
-  filename: './datastore/data.nedb',
-  autoload: true,
-});
+const { FB_TOKEN } = process.env;
+if (!FB_TOKEN) throw Error('Missing FB_TOKEN enviroment variable');
 
 interface Doc {
   email: string;
@@ -14,22 +13,25 @@ interface Doc {
   expires_at: number;
 }
 
-function upsert(doc: Doc) {
-  return new Promise<Doc>((resolve, reject) => {
-    getDoc({ email: doc.email }).then(oldDoc => {
-      if (!oldDoc) {
-        db.insert({ __id: doc.email, ...doc }, err => {
-          if (err) reject(err);
-          else resolve(doc);
-        });
-      } else {
-        db.update({ email: doc.email }, doc, {}, err => {
-          if (err) reject(err);
-          else resolve(doc);
-        });
-      }
+const baseUrl = 'https://firebaseinspector.firebaseio.com/';
+
+const auth = `?auth=${FB_TOKEN}`;
+
+const fb = {
+  get: async (id: string) => {
+    const res = await got.get(`${baseUrl}/accounts/${id}.json${auth}`);
+    return JSON.parse(res.body) as (Doc | null);
+  },
+  update: async (id: string, doc: Partial<Doc>) => {
+    await got.patch(`${baseUrl}/accounts/${id}/.json${auth}`, {
+      body: JSON.stringify(doc),
     });
-  });
+  },
+};
+
+async function upsert(doc: Doc) {
+  await fb.update(doc.email, doc);
+  return doc;
 }
 
 interface UpdateAccessTokenParams {
@@ -38,46 +40,28 @@ interface UpdateAccessTokenParams {
   expires_at: number;
 }
 
-function updateAccessToken({
+async function updateAccessToken({
   email,
   access_token,
   expires_at,
 }: UpdateAccessTokenParams) {
-  return new Promise<Doc>((resolve, reject) => {
-    db.update({ email }, { $set: { access_token, expires_at } }, {}, err => {
-      if (err) reject(err);
-      else {
-        getDoc({ email })
-          .then(doc => {
-            if (!doc)
-              throw Error('Could not find doc after updating access token');
-            resolve(doc);
-          })
-          .catch(reject);
-      }
-    });
-  });
+  await fb.update(email, { access_token, expires_at });
+  const doc = await fb.get(email);
+  if (!doc) throw Error('Could not find doc after updating access token');
+  return doc;
 }
-
-interface GetDocParams {
-  email: string;
-}
-
-const getDoc = ({ email }: GetDocParams) =>
-  new Promise<Doc | null>((resolve, reject) => {
-    db.findOne({ __id: email }, (err, doc: Doc | null) => {
-      if (err) reject(err);
-      else resolve(doc);
-    });
-  });
 
 interface GetAccessTokenParams {
   email: string;
 }
 
 export async function getAccessToken({ email }: GetAccessTokenParams) {
-  const doc = await getDoc({ email });
+  const doc = await fb.get(email);
+
+  // If we don't have their email and are in this method, we need
+  // a new code, so just tell the client to forget this email
   if (!doc) throw new MissingEmailError(`No doc for ${email}`);
+
   if (doc.expires_at && Date.now() < doc.expires_at) {
     // Still active, return current token
     return doc;

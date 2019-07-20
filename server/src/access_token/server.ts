@@ -48,7 +48,7 @@ export async function getAccessToken(query: Query): Promise<Res> {
       console.log(ret);
       return ret;
     } else {
-      throw Error(`Request needs email or code, got ${query}`);
+      throw Error(`Request needs email or code, got: ${JSON.stringify(query)}`);
     }
   } catch (error) {
     Sentry.captureException(error);
@@ -59,7 +59,7 @@ export async function getAccessToken(query: Query): Promise<Res> {
     if (error.response) {
       return { error: error.response.data };
     } else {
-      return { error: error.toString() };
+      return { error: error.message };
     }
   }
 }
