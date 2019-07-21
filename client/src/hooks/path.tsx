@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { observe } from 'mobx';
 import { navigate } from '@reach/router';
 import throttle from 'lodash/throttle';
+import isEqual from 'lodash/isEqual';
 
 import { openStore, dataStore } from 'stores/store';
 
@@ -101,14 +102,21 @@ function getChildrenPath(initialPath: string[]): string[][] {
 
 export const usePathArr = () => {
   const { path } = usePath();
-  const [childrenPath, setChildrenPath] = useState(() => getChildrenPath(path));
+  const [childrenPath, setChildrenPath] = useState(() => {
+    return getChildrenPath(path);
+  });
   useEffect(() => {
-    const updatePath = throttle(
-      () => {
-        setChildrenPath(getChildrenPath(path));
-      },
-      250,
-    );
+    const updatePath = throttle(() => {
+      const newPath = getChildrenPath(path);
+      // Prevent needless rerenders
+      // TODO: Try removing
+      if (!isEqual(childrenPath, newPath)) {
+        console.log('setting', childrenPath, newPath)
+        setChildrenPath(newPath);
+      } else {
+        console.log('skipping a set')
+      }
+    }, 250);
     updatePath();
     const openCleanup = openStore.observe(() => {
       updatePath();
@@ -122,6 +130,6 @@ export const usePathArr = () => {
       openCleanup();
       dataCleanup();
     };
-  }, [path]);
+  }, [path, childrenPath]);
   return childrenPath;
 };

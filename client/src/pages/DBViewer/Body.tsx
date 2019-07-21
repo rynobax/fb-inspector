@@ -19,6 +19,8 @@ const Body: React.FC<BodyProps> = props => {
   const size = useComponentSize(contentRef);
   const [search, setSearch] = useState('');
 
+  console.log('rerendering body');
+
   if (!project) return null;
 
   function pathAt(i: number) {
@@ -81,6 +83,7 @@ const Body: React.FC<BodyProps> = props => {
                 style={style}
                 initiallyOpen={!search && index === 0}
                 shouldFetch={!isScrolling}
+                ndx={index}
               />
             );
           }}

@@ -13,15 +13,22 @@ import Expand from './Expand';
 
 export const ROW_HEIGHT = 28;
 
+function nodeIsEqual(prevProps: NodeProps, nextProps: NodeProps) {
+  const { path: prevPath, ...prev } = prevProps;
+  const { path: nextPath, ...next } = nextProps;
+  return prevPath.join('/') === nextPath.join('/') && areEqual(prev, next);
+}
+
 interface NodeProps {
   path: string[];
   style: React.CSSProperties;
   initiallyOpen: boolean;
   shouldFetch: boolean;
+  ndx: number;
 }
 
 const Node: React.FC<NodeProps> = memo(
-  ({ path, style, initiallyOpen, shouldFetch }) => {
+  ({ path, style, initiallyOpen, shouldFetch, ndx }) => {
     const { open, toggle } = useIsPathOpen(path, initiallyOpen);
     const { setPath, path: basePath } = usePath();
     const { data, loading } = useFirebase(path, shouldFetch);
@@ -29,6 +36,7 @@ const Node: React.FC<NodeProps> = memo(
 
     const depth = path.length - basePath.length;
     const isTopLevel = depth === 0;
+    // console.log(ndx);
 
     return (
       <Container style={style}>
@@ -52,7 +60,7 @@ const Node: React.FC<NodeProps> = memo(
       </Container>
     );
   },
-  areEqual
+  nodeIsEqual
 );
 
 interface TooltipWrapperProps {

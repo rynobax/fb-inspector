@@ -1,10 +1,10 @@
 - now -
+disable network requests while scrolling
 
 - future -
 export data at current path
-disable network requests while scrolling
+search based on children
 -- release --
-for projects, store added time for consistant sorting
 delete users from server as well as client?
 
 - maybe -

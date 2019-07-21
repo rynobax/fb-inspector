@@ -12,4 +12,7 @@ import Setup from './Setup';
 // import * as seed from './hooks/seed';
 // seed.start();
 
+// const whyDidYouRender = require('@welldone-software/why-did-you-render');
+// whyDidYouRender(React);
+
 ReactDOM.render(<Setup />, document.getElementById('root'));
