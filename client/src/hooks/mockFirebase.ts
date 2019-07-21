@@ -17,7 +17,6 @@ export function mockQueryData(pathStr: string) {
       const path = pathStr.split('/').slice(1);
       const value = pathStr === '/' ? data : get(data, path);
       const shallowValue = shallowify(value);
-      console.log({ pathStr, path, value, shallowValue });
       resolve(shallowValue);
     }, QUERY_TIME_MS);
   });

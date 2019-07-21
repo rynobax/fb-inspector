@@ -180,7 +180,7 @@ export const useFirebase = (
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathStr, project.id, account.id]);
+  }, [pathStr, project.id, account.id, shouldFetch]);
 
   return res;
 };
