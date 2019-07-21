@@ -1,5 +1,4 @@
 import React from 'react';
-import { useFirebase } from 'hooks/firebase';
 import { FirebaseValue } from 'stores/store';
 import styled from 'sc';
 
@@ -20,11 +19,11 @@ function getValueString(v: FirebaseValue | undefined) {
 }
 
 interface ValueProps {
-  path: string[];
+  data: FirebaseValue | undefined;
+  loading: boolean;
 }
 
-const Value: React.FC<ValueProps> = ({ path }) => {
-  const { data, loading } = useFirebase(path);
+const Value: React.FC<ValueProps> = ({ loading, data }) => {
   if (loading) return <LoadingBar />;
   const value = getValueString(data);
   return (

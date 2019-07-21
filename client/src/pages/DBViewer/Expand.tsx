@@ -1,19 +1,18 @@
 import React from 'react';
 import styled from 'sc';
 
-import { useFirebase } from 'hooks/firebase';
-
 import Add from 'icons/Add';
 import Remove from 'icons/Remove';
+import { FirebaseValue } from 'stores/store';
 
 interface ExpandProps {
-  path: string[];
   toggle: () => void;
   open: boolean;
+  loading: boolean;
+  data: FirebaseValue | undefined;
 }
 
-const Expand: React.FC<ExpandProps> = ({ path, toggle, open }) => {
-  const { data, loading } = useFirebase(path);
+const Expand: React.FC<ExpandProps> = ({ toggle, open, loading, data }) => {
   if (loading) return <ExpandPlaceholder />;
   const isObject = !!(data && typeof data === 'object');
   if (!isObject) return <ExpandPlaceholder />;

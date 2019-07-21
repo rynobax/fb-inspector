@@ -109,7 +109,10 @@ type UseFirebaseResponse =
   | { loading: true; data: undefined }
   | { loading: false; data: FirebaseValue };
 
-export const useFirebase = (path: string[]): UseFirebaseResponse => {
+export const useFirebase = (
+  path: string[],
+  shouldFetch: boolean
+): UseFirebaseResponse => {
   const { account, project } = useInfoForQuery();
   const pathStr = pathToString(path);
   const [res, setRes] = useState<UseFirebaseResponse>(() => {
@@ -132,6 +135,7 @@ export const useFirebase = (path: string[]): UseFirebaseResponse => {
   });
 
   useEffect(() => {
+    if (!shouldFetch) return;
     let cancelled = false;
     const val = getOrQueryData({
       account,

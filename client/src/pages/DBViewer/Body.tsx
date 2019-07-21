@@ -80,6 +80,7 @@ const Body: React.FC<BodyProps> = props => {
                 key={path.join('/')}
                 style={style}
                 initiallyOpen={!search && index === 0}
+                shouldFetch={!isScrolling}
               />
             );
           }}

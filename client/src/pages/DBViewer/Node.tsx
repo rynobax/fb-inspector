@@ -1,7 +1,8 @@
 import React, { memo, isValidElement } from 'react';
 import styled from 'sc';
+import { areEqual } from 'react-window';
 
-import { usePrimeFirebase } from 'hooks/firebase';
+import { useFirebase } from 'hooks/firebase';
 import { usePath, useIsPathOpen } from 'hooks/path';
 import { getTimeStrFromKey } from 'services/util';
 
@@ -16,33 +17,43 @@ interface NodeProps {
   path: string[];
   style: React.CSSProperties;
   initiallyOpen: boolean;
+  shouldFetch: boolean;
 }
 
-const Node: React.FC<NodeProps> = memo(({ path, style, initiallyOpen }) => {
-  const { open, toggle } = useIsPathOpen(path, initiallyOpen);
-  const { setPath, path: basePath } = usePath();
-  const key = path[path.length - 1] || '/';
+const Node: React.FC<NodeProps> = memo(
+  ({ path, style, initiallyOpen, shouldFetch }) => {
+    const { open, toggle } = useIsPathOpen(path, initiallyOpen);
+    const { setPath, path: basePath } = usePath();
+    const { data, loading } = useFirebase(path, shouldFetch);
+    const key = path[path.length - 1] || '/';
 
-  const depth = path.length - basePath.length;
-  const isTopLevel = depth === 0;
+    const depth = path.length - basePath.length;
+    const isTopLevel = depth === 0;
 
-  return (
-    <Container style={style}>
-      <DepthPadding depth={depth} />
-      <TooltipWrapper keyStr={key}>
-        <Label>
-          {isTopLevel ? null : (
-            <Expand toggle={toggle} open={open} path={path} />
-          )}
-          <Key expandable={true} onClick={() => setPath(path)}>
-            {key}{' '}
-          </Key>
-        </Label>
-      </TooltipWrapper>
-      <Value path={path} />
-    </Container>
-  );
-});
+    return (
+      <Container style={style}>
+        <DepthPadding depth={depth} />
+        <TooltipWrapper keyStr={key}>
+          <Label>
+            {isTopLevel ? null : (
+              <Expand
+                toggle={toggle}
+                open={open}
+                data={data}
+                loading={loading}
+              />
+            )}
+            <Key expandable={true} onClick={() => setPath(path)}>
+              {key}{' '}
+            </Key>
+          </Label>
+        </TooltipWrapper>
+        <Value data={data} loading={loading} />
+      </Container>
+    );
+  },
+  areEqual
+);
 
 interface TooltipWrapperProps {
   keyStr: string;
