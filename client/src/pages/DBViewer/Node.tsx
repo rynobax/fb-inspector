@@ -27,40 +27,41 @@ interface NodeProps {
   ndx: number;
 }
 
-const Node: React.FC<NodeProps> = memo(
-  ({ path, style, initiallyOpen, shouldBeFast, ndx }) => {
-    const { open, toggle } = useIsPathOpen(path, initiallyOpen);
-    const { setPath, path: basePath } = usePath();
-    const { data, loading } = useFirebase(path, !shouldBeFast);
-    const key = path[path.length - 1] || '/';
+let i = 0;
 
-    const depth = path.length - basePath.length;
-    const isTopLevel = depth === 0;
+const Node: React.FC<NodeProps> = ({
+  path,
+  style,
+  initiallyOpen,
+  shouldBeFast,
+  ndx,
+}) => {
+  const time = String(i++) + '\t';
+  const { open, toggle } = useIsPathOpen(path, initiallyOpen);
+  const { setPath, path: basePath } = usePath();
+  const { data, loading } = useFirebase(path, !shouldBeFast, time);
+  const key = path[path.length - 1] || '/';
 
-    return (
-      <Container style={style}>
-        <DepthPadding depth={depth} />
-        <TooltipWrapper keyStr={key}>
-          <Label>
-            {isTopLevel ? null : (
-              <Expand
-                toggle={toggle}
-                open={open}
-                data={data}
-                loading={loading}
-              />
-            )}
-            <Key expandable={true} onClick={() => setPath(path)}>
-              {key}{' '}
-            </Key>
-          </Label>
-        </TooltipWrapper>
-        <Value data={data} loading={loading} />
-      </Container>
-    );
-  },
-  nodeIsEqual
-);
+  const depth = path.length - basePath.length;
+  const isTopLevel = depth === 0;
+
+  return (
+    <Container style={style}>
+      <DepthPadding depth={depth} />
+      <TooltipWrapper keyStr={key}>
+        <Label>
+          {isTopLevel ? null : (
+            <Expand toggle={toggle} open={open} data={data} loading={loading} />
+          )}
+          <Key expandable={true} onClick={() => setPath(path)}>
+            {key}{' '}
+          </Key>
+        </Label>
+      </TooltipWrapper>
+      <Value data={data} loading={loading} />
+    </Container>
+  );
+};
 
 interface TooltipWrapperProps {
   keyStr: string;
@@ -82,12 +83,14 @@ const DepthPadding = styled.div<{ depth: number }>`
   height: 100%;
   width ${p => Math.max(p.depth - 1, 0) * 14}px;
 `;
+DepthPadding.displayName = 'DepthPadding';
 
 const Container = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
 `;
+Container.displayName = 'Container';
 
 const Key = styled.div<{ expandable: boolean }>`
   font-weight: 700;
@@ -98,6 +101,7 @@ const Key = styled.div<{ expandable: boolean }>`
     cursor: pointer;
   }
 `;
+Key.displayName = 'Key';
 
 const Label = styled.div`
   display: flex;
@@ -107,5 +111,6 @@ const Label = styled.div`
   height: ${ROW_HEIGHT}px;
   flex: 0 0 auto;
 `;
+Label.displayName = 'Label';
 
-export default Node;
+export default memo(Node, nodeIsEqual);

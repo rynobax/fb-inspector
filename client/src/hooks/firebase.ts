@@ -127,7 +127,8 @@ type UseFirebaseResponse =
 
 export const useFirebase = (
   path: string[],
-  shouldFetch: boolean
+  shouldFetch: boolean,
+  key: string
 ): UseFirebaseResponse => {
   const { account, project } = useInfoForQuery();
   const pathStr = pathToString(path);

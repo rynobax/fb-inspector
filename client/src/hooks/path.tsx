@@ -76,28 +76,68 @@ export const useIsPathOpen = (path: string[], initialVal: boolean) => {
   return { open, toggle };
 };
 
+let i = 0;
+
+const LOOP_LIMIT = 100000;
+
 function getChildrenPath(initialPath: string[]): string[][] {
-  const pathStr = pathToString(initialPath);
+  const timeKey = 'getChildrenPath' + String(i++);
+  console.time(timeKey);
 
-  const initialData = dataStore.get(pathStr);
-  if (!initialData) return [initialPath];
+  const res: string[][] = [];
+  const queue = [initialPath];
 
-  const { value } = initialData;
-  if (typeof value !== 'object' || !value) return [initialPath];
+  let count = 0;
+  while (true) {
+    const path = queue.shift();
+    if (count++ > LOOP_LIMIT)
+      throw Error(`Exceeded path limit of ${LOOP_LIMIT}`);
+    if (!path) break;
 
-  const isOpen = openStore.get(pathStr);
-  if (!isOpen) return [initialPath];
+    // Everything on the queue should make it into the result
+    res.push(path);
 
-  const keys = Object.keys(value);
-  keys.sort((a, b) => a.localeCompare(b));
+    // In order for this path to be "open", we must have
+    // got it's data and it must be an object, and it
+    // must be tagged as open
+    const pathStr = pathToString(path);
+    const data = dataStore.get(pathStr);
+    if (!data) continue;
+    const { value } = data;
+    if (typeof value !== 'object' || !value) continue;
+    const isOpen = openStore.get(pathStr);
+    if (!isOpen) continue;
 
-  return keys.reduce(
-    (acc, k) => {
-      const newPath = [...initialPath, k];
-      return [...acc, ...getChildrenPath(newPath)];
-    },
-    [initialPath]
-  );
+    // If it's open, push it's children on to the queue
+    queue.push(...Object.keys(value).map(k => path.concat(k)));
+  }
+
+  console.timeEnd(timeKey);
+  // keys.sort((a, b) => a.localeCompare(b));
+  console.log(res)
+  return res;
+
+  // const initialData = dataStore.get(pathStr);
+  // if (!initialData) return [initialPath];
+
+  // const { value } = initialData;
+  // if (typeof value !== 'object' || !value) return [initialPath];
+
+  // const isOpen = openStore.get(pathStr);
+  // if (!isOpen) return [initialPath];
+
+  // const keys = Object.keys(value);
+  // keys.sort((a, b) => a.localeCompare(b));
+
+  // const result = keys.reduce(
+  //   (acc, k) => {
+  //     const newPath = [...initialPath, k];
+  //     return [...acc, ...getChildrenPath(newPath)];
+  //   },
+  //   [initialPath]
+  // );
+
+  // return result;
 }
 
 export const usePathArr = () => {
