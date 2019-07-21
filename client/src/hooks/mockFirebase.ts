@@ -7,9 +7,10 @@ const QUERY_TIME_MS = 0;
 const dataChoices = {
   small: createSmall(),
   long: createLong(),
+  test: createTest(),
 };
 
-const data = dataChoices.long;
+const data = dataChoices.test;
 
 export function mockQueryData(pathStr: string) {
   return new Promise<FirebaseValue>(resolve => {
@@ -80,4 +81,15 @@ function createLong() {
     toReturn.stuff[key] = Math.random();
   }
   return toReturn;
+}
+
+function createTest() {
+  return {
+    '-aaaaa': 0,
+    '-LjETJxjC4D4qd2If9V1': 1,
+    '-LjGofqVYWzdUeRg6oYz': 2,
+    '-LjgBG8PfX1b0ao11Hrr': 3,
+    '-LjgoQwTC__RF-1xMylo': 4,
+    '-zzzzzzz': 5,
+  };
 }

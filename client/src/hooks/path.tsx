@@ -50,6 +50,10 @@ export function pathToString(path: string[]) {
   return path.length === 0 ? '/' : `/${path.join('/')}`;
 }
 
+function stringToPath(path: string) {
+  return path === '/' ? [] : path.split('/').slice(1);
+}
+
 export const usePath = () => {
   const { path, setPath, pathStr } = useContext(PathContext);
   return { path, pathStr, setPath };
@@ -80,27 +84,56 @@ let i = 0;
 
 const LOOP_LIMIT = 100000;
 
-function getChildrenPath(initialPath: string[]): string[][] {
-  const timeKey = 'getChildrenPath' + String(i++);
-  console.time(timeKey);
+const A_FIRST = 1;
+const B_FIRST = -1;
+const EQL = 0;
 
-  const res: string[][] = [];
-  const queue = [initialPath];
+// A = 65
+// Z = 90
+// a = 97
+// z = 122
+
+const Z = 90;
+const CASE_DIFF = 25.5;
+
+function lexCompare(a: string, b: string) {
+  const len = Math.min(a.length, b.length);
+  for (let i = 0; i <= len; i++) {
+    let aCode = a.charCodeAt(i);
+    let bCode = b.charCodeAt(i);
+
+    // Promote upper before lower equivelent, but not
+    // above same letter in diff case
+    if (aCode <= Z) aCode += CASE_DIFF;
+    if (bCode <= Z) bCode += CASE_DIFF;
+
+    if (isNaN(aCode)) return B_FIRST;
+    if (isNaN(bCode)) return A_FIRST;
+
+    if (aCode !== bCode) {
+      return aCode > bCode ? A_FIRST : B_FIRST;
+    }
+  }
+  return EQL;
+}
+
+function getChildrenPath(initialPath: string[]): string[][] {
+  const resStrings: string[] = [];
+  const queue = [pathToString(initialPath)];
 
   let count = 0;
   while (true) {
-    const path = queue.shift();
+    const pathStr = queue.shift();
     if (count++ > LOOP_LIMIT)
       throw Error(`Exceeded path limit of ${LOOP_LIMIT}`);
-    if (!path) break;
+    if (!pathStr) break;
 
     // Everything on the queue should make it into the result
-    res.push(path);
+    resStrings.push(pathStr);
 
     // In order for this path to be "open", we must have
     // got it's data and it must be an object, and it
     // must be tagged as open
-    const pathStr = pathToString(path);
     const data = dataStore.get(pathStr);
     if (!data) continue;
     const { value } = data;
@@ -108,14 +141,14 @@ function getChildrenPath(initialPath: string[]): string[][] {
     const isOpen = openStore.get(pathStr);
     if (!isOpen) continue;
 
+    const prefix = pathStr === '/' ? '' : '/';
     // If it's open, push it's children on to the queue
-    queue.push(...Object.keys(value).map(k => path.concat(k)));
+    queue.push(...Object.keys(value).map(k => pathStr + prefix + k));
   }
 
-  console.timeEnd(timeKey);
-  // keys.sort((a, b) => a.localeCompare(b));
-  console.log(res)
-  return res;
+  resStrings.sort(lexCompare);
+  const resPaths = resStrings.map(stringToPath);
+  return resPaths;
 
   // const initialData = dataStore.get(pathStr);
   // if (!initialData) return [initialPath];

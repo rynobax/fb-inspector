@@ -16,12 +16,6 @@ save open state between projects
 show timestamp as time
 
 -- issues --
-firebase keys are not sorted properly sometimes:
--LjETJxjC4D4qd2If9V1
--LjgBG8PfX1b0ao11Hrr
--LjGofqVYWzdUeRg6oYz
--LjgoQwTC__RF-1xMylo
-
 switching projects doesnt load data
 
 make sure that you cant delete data with oath token

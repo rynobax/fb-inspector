@@ -27,8 +27,6 @@ interface NodeProps {
   ndx: number;
 }
 
-let i = 0;
-
 const Node: React.FC<NodeProps> = ({
   path,
   style,
@@ -36,10 +34,9 @@ const Node: React.FC<NodeProps> = ({
   shouldBeFast,
   ndx,
 }) => {
-  const time = String(i++) + '\t';
   const { open, toggle } = useIsPathOpen(path, initiallyOpen);
   const { setPath, path: basePath } = usePath();
-  const { data, loading } = useFirebase(path, !shouldBeFast, time);
+  const { data, loading } = useFirebase(path, !shouldBeFast);
   const key = path[path.length - 1] || '/';
 
   const depth = path.length - basePath.length;

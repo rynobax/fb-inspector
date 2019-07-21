@@ -127,8 +127,7 @@ type UseFirebaseResponse =
 
 export const useFirebase = (
   path: string[],
-  shouldFetch: boolean,
-  key: string
+  shouldFetch: boolean
 ): UseFirebaseResponse => {
   const { account, project } = useInfoForQuery();
   const pathStr = pathToString(path);
@@ -184,21 +183,4 @@ export const useFirebase = (
   }, [pathStr, project.id, account.id, shouldFetch]);
 
   return res;
-};
-
-export const usePrimeFirebase = (
-  path: string[],
-  // When scrolling we want to disable priming
-  shouldPrime: boolean
-) => {
-  const { account, project } = useInfoForQuery();
-  const pathStr = pathToString(path);
-  useEffect(() => {
-    if (shouldPrime)
-      getOrQueryData({
-        account,
-        pathStr,
-        projectId: project.id,
-      });
-  }, [project, pathStr, account, shouldPrime]);
 };
