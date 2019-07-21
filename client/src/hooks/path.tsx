@@ -149,28 +149,6 @@ function getChildrenPath(initialPath: string[]): string[][] {
   resStrings.sort(lexCompare);
   const resPaths = resStrings.map(stringToPath);
   return resPaths;
-
-  // const initialData = dataStore.get(pathStr);
-  // if (!initialData) return [initialPath];
-
-  // const { value } = initialData;
-  // if (typeof value !== 'object' || !value) return [initialPath];
-
-  // const isOpen = openStore.get(pathStr);
-  // if (!isOpen) return [initialPath];
-
-  // const keys = Object.keys(value);
-  // keys.sort((a, b) => a.localeCompare(b));
-
-  // const result = keys.reduce(
-  //   (acc, k) => {
-  //     const newPath = [...initialPath, k];
-  //     return [...acc, ...getChildrenPath(newPath)];
-  //   },
-  //   [initialPath]
-  // );
-
-  // return result;
 }
 
 export const usePathArr = () => {

@@ -1,5 +1,4 @@
 - now -
-disable network requests while scrolling
 
 - future -
 export data at current path
