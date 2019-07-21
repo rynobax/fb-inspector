@@ -2,7 +2,7 @@ import { FirebaseValue } from 'stores/store';
 import times from 'lodash/times';
 import get from 'lodash/get';
 
-const QUERY_TIME_MS = 500;
+const QUERY_TIME_MS = 0;
 
 const dataChoices = {
   small: createSmall(),

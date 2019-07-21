@@ -24,7 +24,7 @@ interface ValueProps {
 }
 
 const Value: React.FC<ValueProps> = ({ loading, data }) => {
-  if (loading) return <LoadingBar />;
+  if (loading) return null;
   const value = getValueString(data);
   return (
     <ValueContainer title={value ? value : undefined}>{value}</ValueContainer>
