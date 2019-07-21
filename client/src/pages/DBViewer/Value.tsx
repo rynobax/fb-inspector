@@ -26,8 +26,18 @@ interface ValueProps {
 const Value: React.FC<ValueProps> = ({ path }) => {
   const { data, loading } = useFirebase(path);
   if (loading) return <LoadingBar />;
-  return <>{getValueString(data)}</>;
+  const value = getValueString(data);
+  return (
+    <ValueContainer title={value ? value : undefined}>{value}</ValueContainer>
+  );
 };
+
+const ValueContainer = styled.div`
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 0px;
+  overflow: hidden;
+`;
 
 const LOADING_PRIMARY = '#e0e0e0';
 const LOADING_SECONDARY = '#f3f3f3';

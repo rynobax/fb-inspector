@@ -49,6 +49,7 @@ const Body: React.FC<BodyProps> = props => {
           width="100%"
           useIsScrolling
           overscanCount={10}
+          style={{ overflowX: 'hidden' }}
         >
           {({ index, style, isScrolling }) => {
             const path = openPaths[index];

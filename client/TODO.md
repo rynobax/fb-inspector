@@ -1,12 +1,10 @@
 - now -
 
-
 - future -
-show tooltip with uid as time
-link to real firebase
 search box
-export data at current path
 search by key within view
+link to real firebase
+export data at current path
 -- release --
 for projects, store added time for consistant sorting
 delete users from server as well as client?
@@ -17,6 +15,7 @@ migrate serialized data
 can use websockets to maybe get perf gains
 preload if nothing else to do
 save open state between projects
+show timestamp as time
 
 -- issues --
 firebase keys are not sorted properly sometimes:

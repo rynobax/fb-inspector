@@ -27,7 +27,8 @@ const Node: React.FC<NodeProps> = memo(({ path, style, ndx }) => {
   const isTopLevel = depth === 0;
 
   return (
-    <Container depth={depth} style={style}>
+    <Container style={style}>
+      <DepthPadding depth={depth} />
       <TooltipWrapper keyStr={key}>
         <Label>
           {isTopLevel ? null : (
@@ -58,11 +59,16 @@ const TooltipWrapper: React.FC<TooltipWrapperProps> = ({
   else return <Tooltip label={time}>{children}</Tooltip>;
 };
 
-const Container = styled.div<{ depth: number }>`
+const DepthPadding = styled.div<{ depth: number }>`
+  flex: 0 0 auto;
+  height: 100%;
+  width ${p => Math.max(p.depth - 1, 0) * 14}px;
+`;
+
+const Container = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-left: ${p => Math.max(p.depth - 1, 0) * 14}px;
 `;
 
 const Key = styled.div<{ expandable: boolean }>`
@@ -81,6 +87,7 @@ const Label = styled.div`
   align-items: center;
   margin-right: 8px;
   height: ${ROW_HEIGHT}px;
+  flex: 0 0 auto;
 `;
 
 export default Node;
