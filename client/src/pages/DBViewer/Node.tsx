@@ -15,11 +15,11 @@ export const ROW_HEIGHT = 28;
 interface NodeProps {
   path: string[];
   style: React.CSSProperties;
-  ndx: number;
+  initiallyOpen: boolean;
 }
 
-const Node: React.FC<NodeProps> = memo(({ path, style, ndx }) => {
-  const { open, toggle } = useIsPathOpen(path, ndx === 0);
+const Node: React.FC<NodeProps> = memo(({ path, style, initiallyOpen }) => {
+  const { open, toggle } = useIsPathOpen(path, initiallyOpen);
   const { setPath, path: basePath } = usePath();
   const key = path[path.length - 1] || '/';
 
