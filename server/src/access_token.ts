@@ -27,7 +27,7 @@ exports.handler = function(ev: Event, _context: any, callback: any) {
         'Access-Control-Allow-Headers':
           'Origin, X-Requested-With, Content-Type, Accept',
         // Required for cookies, authorization headers with HTTPS
-        'Access-Control-Allow-Credentials': true,
+        'Access-Control-Allow-Credentials': 'true',
       },
     });
   });
