@@ -21,6 +21,14 @@ exports.handler = function(ev: Event, _context: any, callback: any) {
     callback(null, {
       statusCode: isErrorRes(res) ? 400 : 200,
       body: JSON.stringify(res),
+      headers: {
+        // Required for CORS support to work
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers':
+          'Origin, X-Requested-With, Content-Type, Accept',
+        // Required for cookies, authorization headers with HTTPS
+        'Access-Control-Allow-Credentials': true,
+      },
     });
   });
 };
