@@ -28,3 +28,5 @@ firebase keys are not sorted properly sometimes:
 switching projects doesnt load data
 
 Warning: The following components suspended during a user-blocking update: SuspendedExpand, SuspendedValue
+
+make sure that you cant delete data with oath token

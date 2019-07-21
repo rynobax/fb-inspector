@@ -118,7 +118,7 @@ export const useFirebase = (path: string[]): UseFirebaseResponse => {
       pathStr,
       projectId: project.id,
     });
-    if (val) {
+    if (val.status === Status.SUCCESS) {
       return {
         loading: false,
         data: val.value,
@@ -132,6 +132,7 @@ export const useFirebase = (path: string[]): UseFirebaseResponse => {
   });
 
   useEffect(() => {
+    let cancelled = false;
     const val = getOrQueryData({
       account,
       pathStr,
@@ -141,7 +142,7 @@ export const useFirebase = (path: string[]): UseFirebaseResponse => {
       case Status.PENDING:
         setRes({ loading: true, data: undefined });
         val.prom.then(e => {
-          setRes({ loading: false, data: e.value });
+          if (!cancelled) setRes({ loading: false, data: e.value });
         });
         break;
       case Status.SUCCESS:
@@ -153,10 +154,12 @@ export const useFirebase = (path: string[]): UseFirebaseResponse => {
         // Impossible
         throw Error();
     }
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathStr, project.id, account.id]);
 
-  console.log(pathStr, res);
   return res;
 };
 

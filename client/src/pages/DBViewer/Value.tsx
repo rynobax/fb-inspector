@@ -25,7 +25,7 @@ interface ValueProps {
 
 const Value: React.FC<ValueProps> = ({ path }) => {
   const { data, loading } = useFirebase(path);
-  if (loading) return null;
+  if (loading) return <LoadingBar />;
   return <>{getValueString(data)}</>;
 };
 
