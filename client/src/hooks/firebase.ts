@@ -5,6 +5,7 @@ import { useProject } from './project';
 import { pathToString } from './path';
 import { dataStore, FirebaseValue, Status, DataStoreObj } from 'stores/store';
 import { useSettings, GoogleAccount } from './settings';
+import { mockQueryData } from './mockFirebase';
 
 function params(obj: { [k: string]: string | boolean }) {
   let str = '';
@@ -18,6 +19,8 @@ function params(obj: { [k: string]: string | boolean }) {
   return str;
 }
 
+const USE_MOCK = true;
+
 interface RequestParams {
   projectId: string;
   account: GoogleAccount;
@@ -29,6 +32,7 @@ async function queryData({
   pathStr,
   projectId,
 }: RequestParams): Promise<FirebaseValue> {
+  if (USE_MOCK) return mockQueryData(pathStr);
   const access_token = await account.getAccessToken();
   const data = await ky(
     `https://${projectId}.firebaseio.com/${pathStr}.json${params({
