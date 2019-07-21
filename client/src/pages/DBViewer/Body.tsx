@@ -69,7 +69,6 @@ const Body: React.FC<BodyProps> = props => {
           itemCount={resultPaths.length}
           width="100%"
           useIsScrolling
-          overscanCount={10}
           style={{ overflowX: 'hidden' }}
         >
           {({ index, style, isScrolling }) => {
@@ -80,7 +79,7 @@ const Body: React.FC<BodyProps> = props => {
                 key={path.join('/')}
                 style={style}
                 initiallyOpen={!search && index === 0}
-                shouldFetch={!isScrolling}
+                shouldBeFast={!!isScrolling}
                 ndx={index}
               />
             );

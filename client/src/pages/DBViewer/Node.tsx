@@ -23,20 +23,19 @@ interface NodeProps {
   path: string[];
   style: React.CSSProperties;
   initiallyOpen: boolean;
-  shouldFetch: boolean;
+  shouldBeFast: boolean;
   ndx: number;
 }
 
 const Node: React.FC<NodeProps> = memo(
-  ({ path, style, initiallyOpen, shouldFetch, ndx }) => {
+  ({ path, style, initiallyOpen, shouldBeFast, ndx }) => {
     const { open, toggle } = useIsPathOpen(path, initiallyOpen);
     const { setPath, path: basePath } = usePath();
-    const { data, loading } = useFirebase(path, shouldFetch);
+    const { data, loading } = useFirebase(path, !shouldBeFast);
     const key = path[path.length - 1] || '/';
 
     const depth = path.length - basePath.length;
     const isTopLevel = depth === 0;
-    if(ndx === 50) console.log(ndx);
 
     return (
       <Container style={style}>
