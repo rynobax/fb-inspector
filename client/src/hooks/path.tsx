@@ -80,8 +80,6 @@ export const useIsPathOpen = (path: string[], initialVal: boolean) => {
   return { open, toggle };
 };
 
-let i = 0;
-
 const LOOP_LIMIT = 100000;
 
 const A_FIRST = 1;
