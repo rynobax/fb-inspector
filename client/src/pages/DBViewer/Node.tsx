@@ -36,7 +36,7 @@ const Node: React.FC<NodeProps> = memo(
 
     const depth = path.length - basePath.length;
     const isTopLevel = depth === 0;
-    // console.log(ndx);
+    if(ndx === 50) console.log(ndx);
 
     return (
       <Container style={style}>

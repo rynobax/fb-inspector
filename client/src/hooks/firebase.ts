@@ -95,6 +95,18 @@ function getOrQueryData({
   }
 }
 
+export function getCachedData({ pathStr }: { pathStr: string }): DataStoreObj {
+  const val = dataStore.get(pathStr);
+  return (
+    val || {
+      status: Status.PENDING,
+      error: null,
+      value: null,
+      prom: (Promise.resolve() as unknown) as Promise<DataStoreObj>,
+    }
+  );
+}
+
 const useInfoForQuery = () => {
   const { project } = useProject();
   const { settings } = useSettings();
@@ -116,11 +128,13 @@ export const useFirebase = (
   const { account, project } = useInfoForQuery();
   const pathStr = pathToString(path);
   const [res, setRes] = useState<UseFirebaseResponse>(() => {
-    const val = getOrQueryData({
-      account,
-      pathStr,
-      projectId: project.id,
-    });
+    const val = shouldFetch
+      ? getOrQueryData({
+          account,
+          pathStr,
+          projectId: project.id,
+        })
+      : getCachedData({ pathStr });
     if (val.status === Status.SUCCESS) {
       return {
         loading: false,

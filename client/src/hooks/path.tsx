@@ -109,12 +109,8 @@ export const usePathArr = () => {
     const updatePath = throttle(() => {
       const newPath = getChildrenPath(path);
       // Prevent needless rerenders
-      // TODO: Try removing
       if (!isEqual(childrenPath, newPath)) {
-        console.log('setting', childrenPath, newPath)
         setChildrenPath(newPath);
-      } else {
-        console.log('skipping a set')
       }
     }, 250);
     updatePath();

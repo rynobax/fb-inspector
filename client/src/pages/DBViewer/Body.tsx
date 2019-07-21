@@ -19,8 +19,6 @@ const Body: React.FC<BodyProps> = props => {
   const size = useComponentSize(contentRef);
   const [search, setSearch] = useState('');
 
-  console.log('rerendering body');
-
   if (!project) return null;
 
   function pathAt(i: number) {

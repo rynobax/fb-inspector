@@ -8,7 +8,7 @@ import { useSettings, SettingsContextProvider } from 'hooks/settings';
 
 const Setup: React.FC = () => {
   return (
-    <React.StrictMode>
+    // <React.StrictMode>
       <ThemeProvider theme={theme}>
         <TopLevelErrorBoundary>
           <SettingsContextProvider>
@@ -17,7 +17,7 @@ const Setup: React.FC = () => {
           </SettingsContextProvider>
         </TopLevelErrorBoundary>
       </ThemeProvider>
-    </React.StrictMode>
+    // </React.StrictMode>
   );
 };
 
