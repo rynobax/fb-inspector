@@ -86,24 +86,13 @@ const A_FIRST = 1;
 const B_FIRST = -1;
 const EQL = 0;
 
-// A = 65
-// Z = 90
-// a = 97
-// z = 122
-
-const Z = 90;
-const CASE_DIFF = 25.5;
+// https://firebase.google.com/docs/database/usage/limits
+const MAX_KEY_LEN = 768;
 
 function lexCompare(a: string, b: string) {
-  const len = Math.min(a.length, b.length);
-  for (let i = 0; i <= len; i++) {
+  for (let i = 0; i <= MAX_KEY_LEN; i++) {
     let aCode = a.charCodeAt(i);
     let bCode = b.charCodeAt(i);
-
-    // Promote upper before lower equivelent, but not
-    // above same letter in diff case
-    if (aCode <= Z) aCode += CASE_DIFF;
-    if (bCode <= Z) bCode += CASE_DIFF;
 
     if (isNaN(aCode)) return B_FIRST;
     if (isNaN(bCode)) return A_FIRST;
