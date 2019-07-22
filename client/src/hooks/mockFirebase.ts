@@ -10,7 +10,7 @@ const dataChoices = {
   test: createTest(),
 };
 
-const data = dataChoices.test;
+const data = dataChoices.long;
 
 export function mockQueryData(pathStr: string) {
   return new Promise<FirebaseValue>(resolve => {

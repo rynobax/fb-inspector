@@ -21,7 +21,6 @@ function nodeIsEqual(prevProps: NodeProps, nextProps: NodeProps) {
 
 interface NodeProps {
   path: string[];
-  style: React.CSSProperties;
   initiallyOpen: boolean;
   shouldBeFast: boolean;
   ndx: number;
@@ -29,7 +28,6 @@ interface NodeProps {
 
 const Node: React.FC<NodeProps> = ({
   path,
-  style,
   initiallyOpen,
   shouldBeFast,
   ndx,
@@ -43,9 +41,9 @@ const Node: React.FC<NodeProps> = ({
   const isTopLevel = depth === 0;
 
   return (
-    <Container style={style}>
+    <Container>
       <DepthPadding depth={depth} />
-      <TooltipWrapper keyStr={key}>
+      <TooltipWrapper keyStr={key} shouldBeFast={shouldBeFast}>
         <Label>
           {isTopLevel ? null : (
             <Expand toggle={toggle} open={open} data={data} loading={loading} />
@@ -62,14 +60,15 @@ const Node: React.FC<NodeProps> = ({
 
 interface TooltipWrapperProps {
   keyStr: string;
-  children: React.ReactNode;
+  shouldBeFast: boolean;
 }
 
 const TooltipWrapper: React.FC<TooltipWrapperProps> = ({
   children,
+  shouldBeFast,
   keyStr,
 }) => {
-  if (!isValidElement(children)) throw Error('Tooltip needs children');
+  if (shouldBeFast) return children as any;
   const time = getTimeStrFromKey(keyStr);
   if (!time) return children;
   else return <Tooltip label={time}>{children}</Tooltip>;

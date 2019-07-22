@@ -1,8 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+} from 'react';
 import { observe } from 'mobx';
 import { navigate } from '@reach/router';
 import throttle from 'lodash/throttle';
-import isEqual from 'lodash/isEqual';
 
 import { openStore, dataStore } from 'stores/store';
 
@@ -69,7 +74,7 @@ export const useIsPathOpen = (path: string[], initialVal: boolean) => {
 
   useEffect(() => {
     const initial = openStore.get(pathStr);
-    if (!initial) openStore.set(pathStr, initialVal);
+    if (!initial && initialVal) openStore.set(pathStr, initialVal);
     return observe(openStore, pathStr, change => setOpen(!!change.newValue));
   }, [pathStr, initialVal]);
 
@@ -104,9 +109,9 @@ function lexCompare(a: string, b: string) {
   return EQL;
 }
 
-function getChildrenPath(initialPath: string[]): string[][] {
+function getChildrenPath(initialPathStr: string): string[][] {
   const resStrings: string[] = [];
-  const queue = [pathToString(initialPath)];
+  const queue = [initialPathStr];
 
   let count = 0;
   while (true) {
@@ -128,9 +133,13 @@ function getChildrenPath(initialPath: string[]): string[][] {
     const isOpen = openStore.get(pathStr);
     if (!isOpen) continue;
 
-    const prefix = pathStr === '/' ? '' : '/';
+    const prefix = pathStr === '/' ? pathStr : pathStr + '/';
     // If it's open, push it's children on to the queue
-    queue.push(...Object.keys(value).map(k => pathStr + prefix + k));
+    const keys = Object.keys(value);
+    const keyLen = keys.length;
+    for (let i = 0; i < keyLen; i++) {
+      queue.push(prefix + keys[i]);
+    }
   }
 
   resStrings.sort(lexCompare);
@@ -138,32 +147,38 @@ function getChildrenPath(initialPath: string[]): string[][] {
   return resPaths;
 }
 
-export const usePathArr = () => {
-  const { path } = usePath();
-  const [childrenPath, setChildrenPath] = useState(() => {
-    return getChildrenPath(path);
-  });
+export const usePathArr = (shouldUpdate: boolean) => {
+  const { pathStr } = usePath();
+
+  const [v, setV] = useState(0);
+
   useEffect(() => {
-    const updatePath = throttle(() => {
-      const newPath = getChildrenPath(path);
-      // Prevent needless rerenders
-      if (!isEqual(childrenPath, newPath)) {
-        setChildrenPath(newPath);
-      }
-    }, 250);
-    updatePath();
-    const openCleanup = openStore.observe(() => {
-      updatePath();
-    });
+    if (shouldUpdate) {
+      const forceUpdate = throttle(() => setV(x => x + 1), 250);
 
-    const dataCleanup = dataStore.observe(() => {
-      updatePath();
-    });
+      const openCleanup = openStore.observe(() => {
+        forceUpdate();
+      });
 
-    return () => {
-      openCleanup();
-      dataCleanup();
-    };
-  }, [path, childrenPath]);
+      const dataCleanup = dataStore.observe(ev => {
+        if (ev.name === pathStr) {
+          // Only pay attention to top level data change
+          // Only other changes will be open/closing events
+          forceUpdate();
+        }
+      });
+
+      return () => {
+        openCleanup();
+        dataCleanup();
+      };
+    }
+  }, [shouldUpdate, pathStr]);
+
+  const childrenPath = useMemo(() => {
+    return getChildrenPath(pathStr);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathStr, v]);
+
   return childrenPath;
 };

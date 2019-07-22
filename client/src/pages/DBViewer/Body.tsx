@@ -11,10 +11,12 @@ import ChevronRight from 'icons/ChevronRight';
 
 interface BodyProps {}
 
-const Body: React.FC<BodyProps> = props => {
+const Body: React.FC<BodyProps> = () => {
   const { path, setPath } = usePath();
   const { project } = useProject();
-  const openPaths = usePathArr();
+  const timeoutRef = useRef<number | null>(null);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const openPaths = usePathArr(!isScrolling);
   const contentRef = useRef<HTMLDivElement>(null);
   const size = useComponentSize(contentRef);
   const [search, setSearch] = useState('');
@@ -68,20 +70,29 @@ const Body: React.FC<BodyProps> = props => {
           itemSize={ROW_HEIGHT}
           itemCount={resultPaths.length}
           width="100%"
-          useIsScrolling
           style={{ overflowX: 'hidden' }}
+          onScroll={() => {
+            if (!isScrolling) setIsScrolling(true);
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+            }
+            timeoutRef.current = setTimeout(() => {
+              setIsScrolling(false);
+            }, 250);
+          }}
         >
-          {({ index, style, isScrolling }) => {
+          {({ index, style }) => {
             const path = resultPaths[index];
             return (
-              <Node
-                path={path}
-                key={path.join('/')}
-                style={style}
-                initiallyOpen={!search && index === 0}
-                shouldBeFast={!!isScrolling}
-                ndx={index}
-              />
+              <div style={style}>
+                <Node
+                  path={path}
+                  key={path.join('/')}
+                  initiallyOpen={!search && index === 0}
+                  shouldBeFast={isScrolling}
+                  ndx={index}
+                />
+              </div>
             );
           }}
         </List>
