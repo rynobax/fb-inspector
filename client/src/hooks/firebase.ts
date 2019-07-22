@@ -5,21 +5,21 @@ import { useProject } from './project';
 import { pathToString } from './path';
 import { dataStore, FirebaseValue, Status, DataStoreObj } from 'stores/store';
 import { useSettings, GoogleAccount } from './settings';
-import { mockQueryData } from './mockFirebase';
+import { mockQueryData, mockSearchData } from './mockFirebase';
 
-function params(obj: { [k: string]: string | boolean }) {
+const USE_MOCK = false;
+
+function params(obj: { [k: string]: string | boolean | undefined }) {
   let str = '';
   const keys = Object.keys(obj);
   if (keys.length === 0) return str;
   str += '?';
   str += keys
-    .filter(k => obj[k] !== '')
+    .filter(k => obj[k] !== '' && obj[k] !== undefined)
     .map(k => `${k}=${obj[k]}`)
     .join('&');
   return str;
 }
-
-const USE_MOCK = true;
 
 interface RequestParams {
   projectId: string;
@@ -183,4 +183,68 @@ export const useFirebase = (
   }, [pathStr, project.id, account.id, shouldFetch]);
 
   return res;
+};
+
+export interface Search {
+  orderBy?: string;
+  startAt?: string;
+  endAt?: string;
+  equalTo?: string;
+}
+
+interface SearchParams extends RequestParams {
+  search: Search;
+}
+
+async function searchData({
+  account,
+  pathStr,
+  projectId,
+  search,
+}: SearchParams): Promise<FirebaseValue> {
+  if (USE_MOCK) return mockSearchData(pathStr, search);
+  const access_token = await account.getAccessToken();
+  const searchQuoted = Object.entries(search).reduce<any>((acc, [k, v]) => {
+    if (v !== undefined) {
+      acc[k] = `"${v}"`;
+    }
+    return acc;
+  }, {});
+
+  const data = await ky(
+    `https://${projectId}.firebaseio.com/${pathStr}.json${params({
+      access_token,
+      ...searchQuoted,
+    })}`
+  );
+  return data.json();
+}
+
+export const useSearch = (path: string[], search: Search) => {
+  const { account, project } = useInfoForQuery();
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<FirebaseValue>(null);
+
+  const pathStr = pathToString(path);
+
+  useEffect(() => {
+    let cancelled = false;
+    console.log('starting search');
+    setLoading(true);
+    setData(null);
+    searchData({ account, pathStr, projectId: project.id, search }).then(
+      res => {
+        if (!cancelled) {
+          setLoading(false);
+          setData(res);
+        }
+      }
+    );
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account.id, pathStr, project.id, JSON.stringify(search)]);
+
+  return { loading, data };
 };

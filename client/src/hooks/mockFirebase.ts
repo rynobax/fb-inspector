@@ -1,6 +1,7 @@
 import { FirebaseValue } from 'stores/store';
 import times from 'lodash/times';
 import get from 'lodash/get';
+import { Search } from './firebase';
 
 const QUERY_TIME_MS = 0;
 
@@ -23,6 +24,19 @@ export function mockQueryData(pathStr: string) {
   });
 }
 
+const SEARCH_TIME_MS = 0;
+
+export function mockSearchData(pathStr: string, search: Search) {
+  return new Promise<FirebaseValue>(resolve => {
+    setTimeout(() => {
+      const path = pathStr.split('/').slice(1);
+      const value = pathStr === '/' ? data : get(data, path);
+      if (typeof value !== 'object' || !value) return resolve(null);
+      return resolve(searchify(value, search));
+    }, SEARCH_TIME_MS);
+  });
+}
+
 function shallowify(v: any) {
   if (typeof v === 'object' && v !== null) {
     return Object.keys(v).reduce<{ [k: string]: boolean }>((acc, k) => {
@@ -32,6 +46,41 @@ function shallowify(v: any) {
   } else {
     return v;
   }
+}
+
+function searchify(v: object, { endAt, equalTo, orderBy, startAt }: Search) {
+  const o: any = {};
+  Object.entries(v).forEach(([k, v]) => {
+    let compareTo: any;
+    switch (orderBy) {
+      case '$key':
+      case undefined:
+        compareTo = k;
+        break;
+      case '$value':
+        compareTo = v;
+        break;
+      default:
+        compareTo = get(v, orderBy);
+        break;
+    }
+
+    compareTo = JSON.stringify(compareTo);
+
+    let keep = true;
+    if (startAt) {
+      keep = keep && startAt < compareTo;
+    }
+    if (endAt) {
+      keep = keep && endAt < compareTo;
+    }
+    if (equalTo !== undefined) {
+      keep = keep && equalTo === compareTo;
+    }
+
+    if (keep) o[k] = v;
+  });
+  return o;
 }
 
 function createSmall() {

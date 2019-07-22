@@ -9,6 +9,7 @@ import { usePath, usePathArr } from 'hooks/path';
 import { useProject } from 'hooks/project';
 import { useComponentSize } from 'hooks/sizing';
 import ChevronRight from 'icons/ChevronRight';
+import { useSearch } from 'hooks/firebase';
 
 type SearchType = 'Key' | 'Value';
 
@@ -22,8 +23,11 @@ const Body: React.FC<BodyProps> = () => {
   const openPaths = usePathArr(!isScrolling);
   const contentRef = useRef<HTMLDivElement>(null);
   const size = useComponentSize(contentRef);
-  const [search, setSearch] = useState('');
+  const [searchText, setSearchText] = useState('');
   const [searchType, setSearchType] = useState<SearchType>('Key');
+
+  const { data, loading } = useSearch(path, { orderBy: '$value', equalTo: searchText });
+  console.log({ data, loading })
 
   if (!project) return null;
 
@@ -35,15 +39,20 @@ const Body: React.FC<BodyProps> = () => {
   const externalUrl = `https://${project.id}.firebaseio.com/${path.join('/')}`;
 
   let [first, ...filteredPaths] = openPaths;
-  if (search) {
+  if (searchText) {
     if (searchType === 'Key') {
       const depth = path.length;
       filteredPaths = openPaths.filter(
-        p => p[depth] !== undefined && p[depth].startsWith(search)
+        p => p[depth] !== undefined && p[depth].startsWith(searchText)
       );
     }
-    if(searchType === 'Value') {
-      
+    if (searchType === 'Value') {
+      console.log({ openPaths, data })
+      if (loading) filteredPaths = [];
+      else
+        filteredPaths = openPaths.filter(
+          p => typeof data === 'object' && data && !!data[p[0]]
+        );
     }
   }
 
@@ -79,8 +88,8 @@ const Body: React.FC<BodyProps> = () => {
         </Menu>
         <SearchBar
           placeholder="search"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
+          value={searchText}
+          onChange={e => setSearchText(e.target.value)}
         />
       </SearchContainer>
       <Content ref={contentRef}>
@@ -107,7 +116,7 @@ const Body: React.FC<BodyProps> = () => {
                 <Node
                   path={path}
                   key={path.join('/')}
-                  initiallyOpen={!search && index === 0}
+                  initiallyOpen={!searchText && index === 0}
                   shouldBeFast={isScrolling}
                   ndx={index}
                 />
