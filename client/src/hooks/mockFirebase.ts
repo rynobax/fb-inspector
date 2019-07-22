@@ -10,7 +10,7 @@ const dataChoices = {
   test: createTest(),
 };
 
-const data = dataChoices.long;
+const data = dataChoices.small;
 
 export function mockQueryData(pathStr: string) {
   return new Promise<FirebaseValue>(resolve => {
@@ -76,7 +76,7 @@ function createSmall() {
 
 function createLong() {
   const toReturn: any = { stuff: {} };
-  for (let i = 0; i < 5000; i++) {
+  for (let i = 0; i < 1000; i++) {
     const key = String(Math.random()).slice(3);
     toReturn.stuff[key] = Math.random();
   }

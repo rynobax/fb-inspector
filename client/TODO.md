@@ -1,8 +1,8 @@
 - now -
 
 - future -
-export data at current path
 search based on children
+export data at current path
 -- release --
 delete users from server as well as client?
 

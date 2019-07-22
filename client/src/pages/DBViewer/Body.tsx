@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import styled from 'sc';
+import { Menu, MenuList, MenuButton, MenuItem } from '@reach/menu-button';
 
 import Node, { ROW_HEIGHT } from './Node';
 
@@ -8,6 +9,8 @@ import { usePath, usePathArr } from 'hooks/path';
 import { useProject } from 'hooks/project';
 import { useComponentSize } from 'hooks/sizing';
 import ChevronRight from 'icons/ChevronRight';
+
+type SearchType = 'Key' | 'Value';
 
 interface BodyProps {}
 
@@ -20,6 +23,7 @@ const Body: React.FC<BodyProps> = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const size = useComponentSize(contentRef);
   const [search, setSearch] = useState('');
+  const [searchType, setSearchType] = useState<SearchType>('Key');
 
   if (!project) return null;
 
@@ -32,10 +36,15 @@ const Body: React.FC<BodyProps> = () => {
 
   let [first, ...filteredPaths] = openPaths;
   if (search) {
-    const depth = path.length;
-    filteredPaths = openPaths.filter(
-      p => p[depth] !== undefined && p[depth].startsWith(search)
-    );
+    if (searchType === 'Key') {
+      const depth = path.length;
+      filteredPaths = openPaths.filter(
+        p => p[depth] !== undefined && p[depth].startsWith(search)
+      );
+    }
+    if(searchType === 'Value') {
+      
+    }
   }
 
   const resultPaths = [first, ...filteredPaths];
@@ -59,11 +68,21 @@ const Body: React.FC<BodyProps> = () => {
           Live FB
         </ExternalLink>
       </Nav>
-      <SearchBar
-        placeholder="search"
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-      />
+      <SearchContainer>
+        <Menu>
+          <SearchType>{searchType}</SearchType>
+
+          <MenuList className="slide-down">
+            <MenuItem onSelect={() => setSearchType('Key')}>Key</MenuItem>
+            <MenuItem onSelect={() => setSearchType('Value')}>Value</MenuItem>
+          </MenuList>
+        </Menu>
+        <SearchBar
+          placeholder="search"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+      </SearchContainer>
       <Content ref={contentRef}>
         <List
           height={size.height}
@@ -101,10 +120,6 @@ const Body: React.FC<BodyProps> = () => {
   );
 };
 
-const SearchBar = styled.input`
-  margin-bottom: 8px;
-`;
-
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -117,6 +132,17 @@ const Nav = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+`;
+
+const SearchContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const SearchType = styled(MenuButton)``;
+
+const SearchBar = styled.input`
+  margin-bottom: 8px;
 `;
 
 const Content = styled.div`
